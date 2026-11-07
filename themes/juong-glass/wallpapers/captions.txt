@@ -1,4 +1,4 @@
-﻿# wallpaper_captions: <file><TAB><name>
+# wallpaper_captions: <file><TAB><name>
 01-starry-lake.jpg	Starry Alpine Lake
 02-aurora-mountain.jpg	Aurora & Snowy Peak
 03-sunset-horizon.jpg	Sunset Horizon
