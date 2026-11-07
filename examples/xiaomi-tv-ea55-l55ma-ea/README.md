@@ -50,3 +50,15 @@ Nếu cần chuyển nhanh cổng qua lệnh hoặc launcher bên thứ ba:
 - **HDMI 3**: `am start -a com.xiaomi.mitv.tvplayer.EXTSRC_PLAY -n com.xiaomi.mitv.tvplayer/.ExternalSourceActivity --ei input 25`
 - **Cổng AV**: `am start -a com.xiaomi.mitv.tvplayer.EXTSRC_PLAY -n com.xiaomi.mitv.tvplayer/.ExternalSourceActivity --ei input 2`
 
+---
+
+## 🎬 Hướng Dẫn Mở Khóa Xem Video 4K UHD Trên YouTube
+Xiaomi TV EA55 sở hữu tấm nền vật lý 4K UHD (3840 x 2160 @ 60Hz) và vi xử lý Amlogic hỗ trợ phần cứng HEVC/AVC 4K.
+YouTube thông thường bị giới hạn 1080p do thiếu chứng chỉ Google. Để xem chuẩn 4K siêu nét:
+1. Mở ứng dụng **SmartTube** (đã cài sẵn trên TV).
+2. Vào **Cài đặt** (Bánh răng) -> **Trình phát video** -> **Định dạng video**.
+3. Chọn **Độ phân giải mặc định** -> Chọn **Tốt nhất (4K 2160p)**.
+4. Bật tùy chọn **Mở khóa tất cả định dạng** và ưu tiên bộ giải mã **HEVC** hoặc **AVC**.
+5. Mọi video 4K trên YouTube giờ đây sẽ hiển thị độ phân giải **2160p** và chạy mượt mà trên TV!
+
+

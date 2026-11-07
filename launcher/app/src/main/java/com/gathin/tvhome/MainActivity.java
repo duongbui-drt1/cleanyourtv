@@ -457,6 +457,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        applyCustomFonts();
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
         Config cfg = Config.load(this);
@@ -2775,6 +2776,51 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
+    private void applyCustomFonts() {
+        SharedPreferences prefs = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
+        String clockFontName = prefs.getString("clock_font", "");
+        String dateFontName = prefs.getString("date_font", "");
+
+        android.graphics.Typeface clockTf = loadTypeface(clockFontName);
+        if (clockTf != null) {
+            android.widget.TextClock clock = findViewById(R.id.clock);
+            if (clock != null) clock.setTypeface(clockTf);
+            android.widget.TextClock ampm = findViewById(R.id.ampm);
+            if (ampm != null) ampm.setTypeface(clockTf);
+        }
+
+        android.graphics.Typeface dateTf = loadTypeface(dateFontName);
+        if (dateTf != null) {
+            TextView date = findViewById(R.id.date);
+            if (date != null) date.setTypeface(dateTf);
+            TextView lunar = findViewById(R.id.lunarDate);
+            if (lunar != null) lunar.setTypeface(dateTf);
+            TextView gr = findViewById(R.id.greeting);
+            if (gr != null) gr.setTypeface(dateTf);
+        }
+    }
+
+    private android.graphics.Typeface loadTypeface(String name) {
+        if (name == null || name.isEmpty() || "default".equalsIgnoreCase(name)) return null;
+        File f1 = new File("/sdcard/Android/data/com.gathin.tvhome/files/fonts", name + ".ttf");
+        if (f1.isFile()) {
+            try { return android.graphics.Typeface.createFromFile(f1); } catch (Exception ignored) {}
+        }
+        File f2 = new File("/sdcard/fonts", name + ".ttf");
+        if (f2.isFile()) {
+            try { return android.graphics.Typeface.createFromFile(f2); } catch (Exception ignored) {}
+        }
+        try {
+            if ("roboto".equalsIgnoreCase(name)) return android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.NORMAL);
+            if ("din".equalsIgnoreCase(name) || "space_grotesk".equalsIgnoreCase(name) || "bebas_neue".equalsIgnoreCase(name)) {
+                return android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL);
+            }
+            return android.graphics.Typeface.create(name, android.graphics.Typeface.NORMAL);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     private void updateGreeting() {
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         int res;
@@ -2812,12 +2858,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             else res = R.string.good_night;
         }
         String festiveGreeting = festive ? festival.greetingText(getResources()) : "";
+        SharedPreferences choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
+        String customGreetingName = choices.getString("custom_greeting_name", greetingName);
         if (!festiveGreeting.isEmpty()) {
             greeting.setText(festiveGreeting);
             greeting.setTextColor(liftTowardsWhite(festival.accentColor(), 0.25f));
         } else {
-            greeting.setText(greetingName.isEmpty() ? getString(res)
-                    : getString(R.string.greeting_with_name, getString(res), greetingName));
+            greeting.setText(customGreetingName.isEmpty() ? getString(res)
+                    : getString(R.string.greeting_with_name, getString(res), customGreetingName));
             greeting.setTextColor(greetingColor);
         }
         if (shamsi) shamsiDate.setText(Shamsi.today(getResources()));

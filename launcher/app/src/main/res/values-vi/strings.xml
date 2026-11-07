@@ -146,4 +146,15 @@
     <string name="clock_format_system">Hệ thống</string>
     <string name="clock_format_12">12 giờ</string>
     <string name="clock_format_24">24 giờ</string>
+    <string name="jtv_custom_greeting">Tùy biến lời chào màn hình chính</string>
+    <string name="jtv_custom_greeting_hint">Xin chào, %1$s</string>
+    <string name="jtv_dock_opacity">Độ mờ đục khay ứng dụng (Dock)</string>
+    <string name="jtv_wallpaper_interval">Thời gian tự động đổi hình nền</string>
+    <string name="jtv_wifi_pill">Hiển thị thông tin Wi-Fi trên màn hình chính</string>
+    <string name="jtv_lunar_calendar">Hiển thị lịch Âm</string>
+    <string name="jtv_clock_font">Font chữ đồng hồ</string>
+    <string name="jtv_date_font">Font chữ ngày tháng &amp; lời chào</string>
+    <string name="jtv_accent_color">Màu chủ đạo giao diện</string>
+    <string name="jtv_performance_manager">Quản lý &amp; Giám sát hiệu năng TV</string>
+    <string name="jtv_performance_manager_desc">Theo dõi RAM, bộ nhớ, chip CPU và mở khóa 4K UHD</string>
 </resources>

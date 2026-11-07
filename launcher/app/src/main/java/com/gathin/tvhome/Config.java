@@ -665,6 +665,15 @@ final class Config {
         SharedPreferences choices = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
         // Unmounted storage looks like a theme reset; compare only once the file is readable.
         if (mounted) syncThemeChoices(choices, dir, file);
+        if (choices.contains("custom_greeting_name")) {
+            greetingName = choices.getString("custom_greeting_name", greetingName);
+        }
+        if (choices.contains("show_network_pill")) {
+            showNetworkPill = choices.getBoolean("show_network_pill", showNetworkPill);
+        }
+        if (choices.contains("lunar_date")) {
+            lunar = choices.getBoolean("lunar_date", lunar);
+        }
         int chosenColumns = choices.getInt("columns", columns);
         if (chosenColumns >= 4 && chosenColumns <= 7) columns = chosenColumns;
         int chosenRows = choices.getInt(ROWS_BELOW_DOCK_KEY, rowsBelow);
@@ -677,6 +686,9 @@ final class Config {
         boolean wallpaperEnabled = json == null || bool(json, "wallpaper", true);
         if (!wallpaperEnabled) wallpaper = null;
         int rotationMinutes = json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440);
+        if (choices.contains("wallpaper_rotation_minutes")) {
+            rotationMinutes = choices.getInt("wallpaper_rotation_minutes", rotationMinutes);
+        }
         int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 90);
         int dockOpacity = json == null ? 100 : integer(json, "dock_opacity", 100, 30, 100);
         dockOpacity = chosenDockOpacity(choices.getInt(DOCK_OPACITY_KEY, -1), dockOpacity);
@@ -775,7 +787,7 @@ final class Config {
 
     /** The dock band opacity chosen in Launcher settings, or the theme's when none (or an out-of-range one) is saved. */
     static int chosenDockOpacity(int chosen, int theme) {
-        return chosen >= 30 && chosen <= 100 ? chosen : theme;
+        return chosen >= 5 && chosen <= 100 ? chosen : theme;
     }
 
     private static String fileStamp(File file) {

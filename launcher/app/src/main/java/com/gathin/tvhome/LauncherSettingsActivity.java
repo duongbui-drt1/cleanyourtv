@@ -30,11 +30,17 @@ public final class LauncherSettingsActivity extends Activity {
     private SharedPreferences choices;
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
-    private static final int[] DOCK_OPACITIES = {100, 70, 50, 30};
+    private static final int[] DOCK_OPACITIES = {100, 70, 50, 30, 15, 5};
     private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
     private static final String[] CLOCK_FORMATS = {"system", "12", "24"};
     private final TextView[] clockChoices = new TextView[CLOCK_FORMATS.length];
     private TextView wallpaperChoice;
+    private TextView wallpaperIntervalChoice;
+    private TextView customGreetingChoice;
+    private TextView wifiPillChoice;
+    private TextView lunarChoice;
+    private TextView clockFontChoice;
+    private TextView dateFontChoice;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -89,7 +95,7 @@ public final class LauncherSettingsActivity extends Activity {
                 refresh();
             });
         }
-        int[] dockIds = {R.id.dock100, R.id.dock70, R.id.dock50, R.id.dock30};
+        int[] dockIds = {R.id.dock100, R.id.dock70, R.id.dock50, R.id.dock30, R.id.dock15, R.id.dock5};
         for (int i = 0; i < dockIds.length; i++) {
             final int value = DOCK_OPACITIES[i];
             dockChoices[i] = findViewById(dockIds[i]);
@@ -125,6 +131,27 @@ public final class LauncherSettingsActivity extends Activity {
         }
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
+
+        wallpaperIntervalChoice = findViewById(R.id.wallpaperIntervalChoice);
+        wallpaperIntervalChoice.setOnClickListener(v -> showWallpaperIntervalPicker());
+
+        customGreetingChoice = findViewById(R.id.customGreetingChoice);
+        customGreetingChoice.setOnClickListener(v -> showCustomGreetingDialog());
+
+        wifiPillChoice = findViewById(R.id.wifiPillChoice);
+        wifiPillChoice.setOnClickListener(v -> toggleWifiPill());
+
+        lunarChoice = findViewById(R.id.lunarChoice);
+        lunarChoice.setOnClickListener(v -> toggleLunarDate());
+
+        clockFontChoice = findViewById(R.id.clockFontChoice);
+        clockFontChoice.setOnClickListener(v -> showClockFontPicker());
+
+        dateFontChoice = findViewById(R.id.dateFontChoice);
+        dateFontChoice.setOnClickListener(v -> showDateFontPicker());
+
+        findViewById(R.id.performanceManagerChoice).setOnClickListener(v ->
+                open(new Intent(this, DeveloperActivity.class)));
         animationsChoice = findViewById(R.id.animationsChoice);
         animationsChoice.setOnClickListener(v -> {
             animations = !animations;
@@ -148,10 +175,8 @@ public final class LauncherSettingsActivity extends Activity {
             }
         });
         openOnStartChoice = findViewById(R.id.openOnStartChoice);
-        if (config.openOnStartChoice) {
-            openOnStartChoice.setVisibility(View.VISIBLE);
-            openOnStartChoice.setOnClickListener(v -> showOpenOnStartPicker());
-        }
+        openOnStartChoice.setVisibility(View.VISIBLE);
+        openOnStartChoice.setOnClickListener(v -> showOpenOnStartPicker());
         followThemeChoice = findViewById(R.id.followThemeChoice);
         followThemeChoice.setOnClickListener(v -> {
             if (!hasOnTvChoices()) return;
@@ -223,6 +248,121 @@ public final class LauncherSettingsActivity extends Activity {
         LinearLayout row = (LinearLayout) views[0].getParent();
         row.removeAllViews();
         for (int i = views.length - 1; i >= 0; i--) row.addView(views[i]);
+    }
+
+    private void showCustomGreetingDialog() {
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setTextColor(0xFFFFFFFF);
+        input.setHint("Ví dụ: Dương, Gia đình...");
+        input.setText(choices.getString("custom_greeting_name", ""));
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_custom_greeting)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String name = input.getText().toString().trim();
+                    choices.edit().putString("custom_greeting_name", name).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private static final int[] ROTATION_INTERVALS = {0, 1, 5, 15, 30, 60, 360, 1440};
+    private static final String[] ROTATION_LABELS = {
+            "Giữ 1 ảnh (Tắt đổi tự động)", "1 phút", "5 phút", "15 phút",
+            "30 phút (Mặc định)", "1 giờ", "6 giờ", "24 giờ (1 ngày)"
+    };
+
+    private void showWallpaperIntervalPicker() {
+        int current = choices.getInt("wallpaper_rotation_minutes", 30);
+        int checked = 4;
+        for (int i = 0; i < ROTATION_INTERVALS.length; i++) {
+            if (ROTATION_INTERVALS[i] == current) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_wallpaper_interval)
+                .setSingleChoiceItems(ROTATION_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putInt("wallpaper_rotation_minutes", ROTATION_INTERVALS[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void toggleWifiPill() {
+        boolean show = choices.getBoolean("show_network_pill", true);
+        choices.edit().putBoolean("show_network_pill", !show).apply();
+        changed();
+        refresh();
+    }
+
+    private void toggleLunarDate() {
+        boolean lunar = choices.getBoolean("lunar_date", false);
+        choices.edit().putBoolean("lunar_date", !lunar).apply();
+        changed();
+        refresh();
+    }
+
+    private static final String[] CLOCK_FONT_KEYS = {
+            "default", "inter", "space_grotesk", "roboto", "din", "bebas_neue"
+    };
+    private static final String[] CLOCK_FONT_LABELS = {
+            "Mặc định (Outfit / System)", "Inter", "SF Pro / Space Grotesk", "Roboto", "DIN / DIN Next", "Bebas Neue (Số điện ảnh)"
+    };
+
+    private void showClockFontPicker() {
+        String current = choices.getString("clock_font", "default");
+        int checked = 0;
+        for (int i = 0; i < CLOCK_FONT_KEYS.length; i++) {
+            if (CLOCK_FONT_KEYS[i].equalsIgnoreCase(current)) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_clock_font)
+                .setSingleChoiceItems(CLOCK_FONT_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putString("clock_font", CLOCK_FONT_KEYS[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private static final String[] DATE_FONT_KEYS = {
+            "default", "inter", "manrope", "ibm_plex_sans", "nunito_sans"
+    };
+    private static final String[] DATE_FONT_LABELS = {
+            "Mặc định (Default)", "Inter", "Manrope", "IBM Plex Sans", "Nunito Sans"
+    };
+
+    private void showDateFontPicker() {
+        String current = choices.getString("date_font", "default");
+        int checked = 0;
+        for (int i = 0; i < DATE_FONT_KEYS.length; i++) {
+            if (DATE_FONT_KEYS[i].equalsIgnoreCase(current)) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_date_font)
+                .setSingleChoiceItems(DATE_FONT_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putString("date_font", DATE_FONT_KEYS[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void showWallpaperPicker() {
@@ -373,6 +513,27 @@ public final class LauncherSettingsActivity extends Activity {
                 "none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)
                         : wallpaperCurrent != null ? wallpaperCurrent
                         : getString(R.string.wallpaper_theme_default)));
+
+        int interval = choices.getInt("wallpaper_rotation_minutes", 30);
+        String intervalText = interval == 0 ? "Tắt tự động đổi" : interval + " phút";
+        wallpaperIntervalChoice.setText(getString(R.string.jtv_wallpaper_interval) + ": " + intervalText);
+
+        String greetingName = choices.getString("custom_greeting_name", "");
+        customGreetingChoice.setText(getString(R.string.jtv_custom_greeting) + ": "
+                + (greetingName.isEmpty() ? "Mặc định (Xin chào)" : "Xin chào, " + greetingName));
+
+        boolean showWifi = choices.getBoolean("show_network_pill", true);
+        wifiPillChoice.setText(getString(R.string.jtv_wifi_pill) + ": " + (showWifi ? getString(R.string.on) : getString(R.string.off)));
+
+        boolean showLunar = choices.getBoolean("lunar_date", false);
+        lunarChoice.setText(getString(R.string.jtv_lunar_calendar) + ": " + (showLunar ? getString(R.string.on) : getString(R.string.off)));
+
+        String clockFont = choices.getString("clock_font", "default");
+        clockFontChoice.setText(getString(R.string.jtv_clock_font) + ": " + clockFont);
+
+        String dateFont = choices.getString("date_font", "default");
+        dateFontChoice.setText(getString(R.string.jtv_date_font) + ": " + dateFont);
+
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
         followThemeChoice.setSelected(!hasOnTvChoices());
     }

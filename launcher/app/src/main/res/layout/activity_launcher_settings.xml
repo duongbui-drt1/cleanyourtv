@@ -86,6 +86,8 @@
             <TextView android:id="@+id/dock70" style="@style/SettingsColumnChoice" android:text="70%" />
             <TextView android:id="@+id/dock50" style="@style/SettingsColumnChoice" android:text="50%" />
             <TextView android:id="@+id/dock30" style="@style/SettingsColumnChoice" android:text="30%" />
+            <TextView android:id="@+id/dock15" style="@style/SettingsColumnChoice" android:text="15%" />
+            <TextView android:id="@+id/dock5" style="@style/SettingsColumnChoice" android:text="5%" />
         </LinearLayout>
 
         <TextView
@@ -111,6 +113,42 @@
             android:id="@+id/wallpaperChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="28dp" />
+
+        <TextView
+            android:id="@+id/wallpaperIntervalChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/customGreetingChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/wifiPillChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/lunarChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/clockFontChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/dateFontChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/performanceManagerChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp"
+            android:text="@string/jtv_performance_manager" />
 
         <TextView
             android:id="@+id/animationsChoice"

@@ -22,5 +22,7 @@
   "advanced_effects": true,
   "show_inputs_pill": true,
   "show_network_pill": true,
+  "open_on_start_choice": true,
+  "open_on_start_on_wake": true,
   "columns": 6
 }
