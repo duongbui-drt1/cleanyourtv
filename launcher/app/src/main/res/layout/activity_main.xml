@@ -435,13 +435,13 @@
         android:alpha="0"
         android:importantForAccessibility="no" />
 
-    <!-- Top center brand logo (128x128), toggled by user preference -->
+    <!-- Top center brand logo (64x64), toggled by user preference -->
     <ImageView
         android:id="@+id/topLogo"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="28dp"
         android:scaleType="fitCenter"
         android:visibility="gone"
         android:importantForAccessibility="no" />

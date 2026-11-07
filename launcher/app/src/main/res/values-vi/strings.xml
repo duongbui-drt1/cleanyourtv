@@ -161,5 +161,5 @@
     <string name="jtv_wallpaper_duration">Thời gian thực hiện chuyển cảnh</string>
     <string name="jtv_ambient_intensity">Độ đậm nhạt màu ambient khi chuyển app</string>
     <string name="jtv_boot_logo">Hiển thị Boot Logo Launcher khi khởi động</string>
-    <string name="jtv_top_logo">Hiển thị Logo giữa màn hình (128x128)</string>
+    <string name="jtv_top_logo">Hiển thị Logo giữa màn hình (64x64)</string>
 </resources>
