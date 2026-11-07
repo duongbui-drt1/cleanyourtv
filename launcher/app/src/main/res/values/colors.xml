@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- JUONG TV - Spatial Glassmorphism Design Tokens -->
+
+    <!-- Backgrounds -->
+    <color name="juong_bg_pure_black">#FF000000</color>
+    <color name="juong_bg_dark">#FF070A0F</color>
+    <color name="juong_bg_charcoal">#FF0C1017</color>
+
+    <!-- Translucent Surfaces (Glass) -->
+    <color name="juong_surface_glass_subtle">#1AFFFFFF</color>
+    <color name="juong_surface_glass">#2E182230</color>
+    <color name="juong_surface_glass_active">#4D202F42</color>
+    <color name="juong_surface_card">#FF131A24</color>
+    <color name="juong_surface_card_focused">#FF1C2636</color>
+    <color name="juong_dock_glass_bg">#A60A0E16</color>
+
+    <!-- Brand & Accent Colors (Apple tvOS Cyan / Electric Blue) -->
+    <color name="juong_accent_cyan">#FF00D2FF</color>
+    <color name="juong_accent_blue">#FF0A84FF</color>
+    <color name="juong_accent_glow">#4D00D2FF</color>
+    <color name="juong_accent_glow_soft">#2600D2FF</color>
+
+    <!-- Typography Tokens -->
+    <color name="juong_text_primary">#FFF5F7FA</color>
+    <color name="juong_text_secondary">#FF8E9BAE</color>
+    <color name="juong_text_muted">#808E9BAE</color>
+    <color name="juong_text_accent">#FF00D2FF</color>
+
+    <!-- Glass Borders & Focus Strokes -->
+    <color name="juong_border_glass">#26FFFFFF</color>
+    <color name="juong_border_glass_bright">#4DFFFFFF</color>
+    <color name="juong_focus_border">#FF00D2FF</color>
+    <color name="juong_focus_glow">#6600D2FF</color>
+</resources>

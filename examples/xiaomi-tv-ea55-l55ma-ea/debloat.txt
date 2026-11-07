@@ -1,0 +1,72 @@
+# Xiaomi TV EA55 (Mã hiệu L55MA-EA / MiTV-ASTP0 / AETP0 - Mulan)
+# Hệ điều hành: MIUI for TV / Android 9 / HyperOS (Firmware nội địa Trung Quốc)
+# Cấu hình: Chip Amlogic, 1.5GB / 2GB RAM, màn hình 55 inch 4K
+#
+# QUY TẮC AN TOÀN CHO L55MA-EA:
+# 1. KHÔNG disable com.mitv.tvhome nếu chưa cài đặt HomeKeyService hoặc Launcher thay thế ổn định.
+# 2. KHÔNG disable mitv.service (dịch vụ âm thanh, hình ảnh phần cứng TvService; tắt sẽ gây treo Settings).
+# 3. KHÔNG disable com.android.bluetooth (remote Bluetooth giọng nói).
+#
+# Lệnh chạy tự động:
+# Windows (PowerShell): .\tweak-xiaomi-l55ma-ea.ps1 -Ip <IP_CỦA_TV>
+# Windows (CMD):       tweak-xiaomi-l55ma-ea.bat <IP_CỦA_TV>
+# Linux/macOS:         TV_HOST=<IP_CỦA_TV> tools/disable.sh examples/xiaomi-tv-ea55-l55ma-ea/debloat.txt
+
+# --- 1. DỊCH VỤ GÂY NGHẼN CPU & TRÀN RAM NGHIÊM TRỌNG TRÊN XIAOMI TV ---
+# com.xiaomi.mitv.remotecontroller.service: Kết nối liên tục vào máy chủ relay đã chết,
+# chiếm tới 100-190% CPU và tràn logd ~500MB sau mỗi lần bật TV. BẮT BUỘC TẮT.
+com.xiaomi.mitv.remotecontroller.service
+
+# com.xiaomi.wakeupservice: Lắng nghe từ khóa tiếng Trung XiaoAI, chiếm thường trực ~30% CPU.
+com.xiaomi.wakeupservice
+
+# com.xiaomi.voicecontrol: Trợ lý giọng nói tiếng Trung nội địa (không dùng được tại VN).
+com.xiaomi.voicecontrol
+
+# com.xiaomi.mico.mqtt.service.application.tv: Kết nối loa thông minh Xiao AI.
+com.xiaomi.mico.mqtt.service.application.tv
+
+# --- 2. THU THẬP DỮ LIỆU, QUẢNG CÁO & THEO DÕI (TELEMETRY / ADS) ---
+com.miui.analytics
+com.miui.tv.analytics
+com.xiaomi.statistic
+com.mitv.cloudcontrol
+com.xiaomi.mitv.tvpush.tvpushservice
+com.android.smspush
+com.xiaomi.tvqs
+com.xm.webcontent
+com.mitv.shoplugin
+com.xiaomi.mitv.shop
+com.xiaomi.gamecenter.sdk.service.mibox
+
+# --- 3. DỊCH VỤ RÁC CHẠY NGẦM KHÔNG CẦN THIẾT ---
+com.xiaomi.mitv.tvmanager
+com.xiaomi.mitv.karaoke.service
+com.xiaomi.mimusic2
+com.xiaomi.screenrecorder
+com.xiaomi.mitv.smartpanel
+com.xiaomi.mitv.calendar
+com.xiaomi.tweather
+com.mitv.screensaver
+com.xiaomi.mitv.healthdiagnosis
+com.xiaomi.mitv.legal.webview
+com.android.printspooler
+com.xiaomi.mibox.lockscreen
+com.mitv.gallery
+
+# --- 4. DỊCH VỤ CASTING NỘI ĐỊA TRUNG QUỐC (Giữ lại AirPlay com.xiaomi.mitv.smartshare) ---
+com.xiaomi.miplay
+com.duokan.airkan.tvbox
+com.xiaomi.wfdsinkhelperservice
+com.xiaomi.mi_connect_service
+
+# --- 5. ỨNG DỤNG TRUYỀN HÌNH & XEM PHIM TRUNG QUỐC (NẾU CÓ TRÊN MÁY) ---
+com.gitvdemo.video
+com.duokan.videodaily
+com.xiaomi.tv.gallery
+com.newtv.cboxtv
+com.qiyi.tv
+com.tencent.qqlivetv
+com.youku.tv
+com.cbox.tv
+

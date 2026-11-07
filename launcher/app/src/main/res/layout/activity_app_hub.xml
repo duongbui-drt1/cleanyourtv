@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/juong_bg_dark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/juong_margin_screen_h"
+        android:paddingEnd="@dimen/juong_margin_screen_h"
+        android:paddingTop="@dimen/juong_margin_screen_v"
+        android:paddingBottom="@dimen/juong_margin_screen_v">
+
+        <!-- Top Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/juong_app_hub"
+                android:textColor="@color/juong_text_primary"
+                android:textSize="28sp"
+                android:fontFamily="@string/font_medium" />
+
+            <TextView
+                android:id="@+id/btnBack"
+                style="@style/TopButton"
+                android:text="Back"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Curated Apps List -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/hubContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Populated dynamically with curated TV apps -->
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>

@@ -41,11 +41,21 @@ public final class QuickSettingsActivity extends Activity {
         findViewById(R.id.scrim).setOnClickListener(v -> finish());
         LinearLayout rows = findViewById(R.id.rows);
         addRow(rows, R.drawable.ic_settings, R.string.tv_settings, 0, SystemSettings.intent(this, Settings.ACTION_SETTINGS));
-        addRow(rows, R.drawable.ic_picture, R.string.quick_picture, 0, SystemSettings.displayIntent(this));
         addRow(rows, R.drawable.ic_wifi, R.string.quick_network, 0, SystemSettings.intent(this, Settings.ACTION_WIFI_SETTINGS));
-        addRow(rows, R.drawable.ic_apps, R.string.quick_apps, R.string.quick_apps_hint,
-                SystemSettings.intent(this, Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
-        // Through Home, so it rebuilds with the new choices when Launcher settings closes.
+        addRow(rows, R.drawable.ic_bluetooth, R.string.quick_bluetooth, 0, SystemSettings.bluetoothIntent(this));
+        addRow(rows, R.drawable.ic_picture, R.string.quick_picture, 0, SystemSettings.displayIntent(this));
+        addRow(rows, R.drawable.ic_home_settings, R.string.quick_sound, 0, SystemSettings.soundIntent(this));
+
+        // Xiaomi HDMI 1 (23) switch
+        addRow(rows, R.drawable.ic_input, R.string.inputs, 0, SystemSettings.xiaomiInputIntent(23));
+
+        // JUONG App Hub
+        addRow(rows, R.drawable.ic_apps, R.string.juong_app_hub, 0, new Intent(this, AppHubActivity.class));
+
+        // Developer Mode
+        addRow(rows, R.drawable.ic_developer, R.string.developer_mode, 0, new Intent(this, DeveloperActivity.class));
+
+        // Launcher Settings
         addRow(rows, R.drawable.ic_home_settings, R.string.launcher_settings, 0,
                 new Intent(this, MainActivity.class).setAction(MainActivity.ACTION_LAUNCHER_SETTINGS));
         rows.getChildAt(0).requestFocus();

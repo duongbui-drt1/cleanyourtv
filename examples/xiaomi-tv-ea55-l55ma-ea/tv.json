@@ -1,0 +1,7 @@
+{
+  "tv": "Xiaomi TV EA55 (L55MA-EA / Mulan), Android TV 9 / HyperOS, 1.5GB-2GB RAM",
+  "os": "Android TV 9 / MIUI TV / HyperOS (CN firmware)",
+  "brand": "Xiaomi",
+  "notes": "Bản tối ưu hóa đặc biệt cho Xiaomi TV EA55 (L55MA-EA) tại Việt Nam: Tắt triệt để remote loop spam 190% CPU, tắt trợ lý giọng nói tiếng Trung 30% CPU, tắt quảng cáo khởi động (boot_ad_switch 0), chuyển múi giờ Asia/Ho_Chi_Minh, tăng tốc giao diện (animation 0.5x), giữ lại mitv.service, bluetooth remote và cổng chuyển HDMI/AV."
+}
+

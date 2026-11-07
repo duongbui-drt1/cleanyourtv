@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- JUONG TV - Spatial Dimension Tokens -->
+    <dimen name="juong_radius_card">24dp</dimen>
+    <dimen name="juong_radius_dock">28dp</dimen>
+    <dimen name="juong_radius_pill">21dp</dimen>
+    <dimen name="juong_radius_hero">28dp</dimen>
+
+    <!-- Spacing & Margins -->
+    <dimen name="juong_margin_screen_h">56dp</dimen>
+    <dimen name="juong_margin_screen_v">36dp</dimen>
+    <dimen name="juong_dock_padding">14dp</dimen>
+    <dimen name="juong_card_gap">16dp</dimen>
+
+    <!-- Elevation / Focus -->
+    <dimen name="juong_focus_stroke">2.5dp</dimen>
+    <dimen name="juong_focus_glow_radius">12dp</dimen>
+
+    <!-- Typography Sizes -->
+    <dimen name="juong_text_hero_title">36sp</dimen>
+    <dimen name="juong_text_hero_desc">15sp</dimen>
+    <dimen name="juong_text_card_label">14sp</dimen>
+    <dimen name="juong_text_clock">58sp</dimen>
+</resources>

@@ -16,6 +16,17 @@ final class SystemSettings {
 
     static Intent intent(Context context, String action) {
         PackageManager pm = context.getPackageManager();
+        // Priority for Xiaomi TV network/connectivity actions:
+        if (Settings.ACTION_WIFI_SETTINGS.equals(action) || "android.settings.NETWORK_OPERATOR_SETTINGS".equals(action)) {
+            Intent xiaomiWifi = new Intent().setComponent(new ComponentName("com.xiaomi.mitv.settings", "com.xiaomi.mitv.settings.wifi.MitvWifiActivity"));
+            if (pm.resolveActivity(xiaomiWifi, 0) != null) return xiaomiWifi;
+            Intent aospNet = new Intent().setComponent(new ComponentName("com.android.tv.settings", "com.android.tv.settings.connectivity.NetworkActivity"));
+            if (pm.resolveActivity(aospNet, 0) != null) return aospNet;
+        } else if (Settings.ACTION_BLUETOOTH_SETTINGS.equals(action)) {
+            Intent xiaomiBt = new Intent().setComponent(new ComponentName("com.xiaomi.mitv.settings", "com.xiaomi.mitv.settings.bluetooth.MitvBluetoothActivity"));
+            if (pm.resolveActivity(xiaomiBt, 0) != null) return xiaomiBt;
+        }
+
         Intent standard = new Intent(action);
         ResolveInfo resolved = pm.resolveActivity(standard, PackageManager.MATCH_DEFAULT_ONLY);
         // Fire OS resolves the standard actions to a CTS compliance stub that opens nothing;
@@ -69,11 +80,44 @@ final class SystemSettings {
      * an empty stub in DroidTvSettings; prefer Xiaomi's own PictureActivity where installed.
      */
     static Intent displayIntent(Context context) {
-        ComponentName xiaomi = new ComponentName("com.android.tv.settings",
-                "com.xiaomi.mitv.settings.picture.PictureActivity");
-        if (context.getPackageManager().resolveActivity(new Intent().setComponent(xiaomi), 0) != null) {
-            return new Intent().setComponent(xiaomi);
+        ComponentName xiaomiDisplay = new ComponentName("com.xiaomi.mitv.settings",
+                "com.xiaomi.mitv.settings.entry.DisplaySoundActivity");
+        if (context.getPackageManager().resolveActivity(new Intent().setComponent(xiaomiDisplay), 0) != null) {
+            return new Intent("com.xiaomi.mitv.settings.display_settings").setComponent(xiaomiDisplay);
         }
         return intent(context, Settings.ACTION_DISPLAY_SETTINGS);
+    }
+
+    /** Bluetooth settings intent. */
+    static Intent bluetoothIntent(Context context) {
+        return intent(context, Settings.ACTION_BLUETOOTH_SETTINGS);
+    }
+
+    /** Sound settings intent. */
+    static Intent soundIntent(Context context) {
+        ComponentName xiaomiSound = new ComponentName("com.xiaomi.mitv.settings",
+                "com.xiaomi.mitv.settings.entry.DisplaySoundActivity");
+        if (context.getPackageManager().resolveActivity(new Intent().setComponent(xiaomiSound), 0) != null) {
+            return new Intent("com.xiaomi.mitv.settings.sound_settings").setComponent(xiaomiSound);
+        }
+        return intent(context, Settings.ACTION_SOUND_SETTINGS);
+    }
+
+    /** Xiaomi TV HDMI / External source switch intent (HDMI 1=23, HDMI 2=24, HDMI 3=25, AV=2). */
+    static Intent xiaomiInputIntent(int inputId) {
+        Intent intent = new Intent("com.xiaomi.mitv.tvplayer.EXTSRC_PLAY");
+        intent.setComponent(new ComponentName("com.xiaomi.mitv.tvplayer", "com.xiaomi.mitv.tvplayer.ExternalSourceActivity"));
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.putExtra("input", inputId);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
+    }
+
+    /** Xiaomi TV general input source chooser overlay. */
+    static Intent xiaomiSourcePickerIntent() {
+        Intent intent = new Intent("android.intent.action.MAIN");
+        intent.setComponent(new ComponentName("com.xiaomi.mitv.tvplayer", "com.xiaomi.mitv.tvplayer.ExternalSourceActivity"));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 }

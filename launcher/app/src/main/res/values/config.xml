@@ -116,7 +116,7 @@
          own source picker instead, started by itself for every row, ahead of the standard way: for firmware that
          answers the channel URI with "unsupported" (Redmi X65, MiTV-NSOP0:
          com.xiaomi.mitv.tvplayer/.ExternalSourceActivity opens its HDMI 1 / HDMI 2 / AV overlay). Leave empty to omit. -->
-    <string name="input_action" translatable="false"></string>
+    <string name="input_action" translatable="false">com.xiaomi.mitv.tvplayer.EXTSRC_PLAY</string>
     <!-- Inputs menu: a scheme to send the input's passthrough URI with instead of content:// (and no channel MIME
          type). YaOS: live-tv. Its source player answers live-tv://android.media.tv/passthrough/<input>, while the
          content:// URI goes to its channel player, which resumes the last film it played. Leave empty to omit. -->
@@ -154,6 +154,10 @@
          com.xiaomi.mitv.tvplayer.EXTSRC_PLAY and MStar numbers: HW5=23, HW6=24, HW7=25, HW8=-, HW2=2,
          HW3=-, HW4=- (see examples/redmi-mitv-mftp0). Leave empty to omit. -->
     <string-array name="input_sources" translatable="false">
+        <item>HW5=23</item>
+        <item>HW6=24</item>
+        <item>HW7=25</item>
+        <item>HW1=2</item>
     </string-array>
 
     <!-- Remote buttons that open Settings, by Linux scancode (HOME_KEY_SERVICE=1 build-and-install.sh). Remotes
@@ -267,7 +271,7 @@
          for Arabic with Western digits), instead of the TV's. For firmware
          that has no menu entry for the owner's language although the launcher is translated into it (a China-market
          Xiaomi offers Chinese and English only). Empty, the default, follows the TV. A theme can set it ("locale"). -->
-    <string name="locale" translatable="false"></string>
+    <string name="locale" translatable="false">vi</string>
 
     <!-- A name after the greeting: "Mr. Trịnh" shows GOOD MORNING, MR. TRỊNH. Empty: the greeting alone. -->
     <string name="greeting_name" translatable="false"></string>

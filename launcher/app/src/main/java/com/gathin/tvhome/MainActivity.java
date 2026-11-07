@@ -148,6 +148,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private GlassView glass;
     private View ambient;
     private TextView heroName;
+    private TextView heroBadge;
     /** The top shelf: heroName, plus the cinematic shelf's "Last opened" line and dock position dots. */
     private View hero;
     private TextView heroMeta;
@@ -522,6 +523,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         appGlow = cfg.appGlow;
         if (!ambientGlow) ambient.setVisibility(View.GONE);
         heroName = findViewById(R.id.heroName);
+        heroBadge = findViewById(R.id.heroBadge);
         hero = findViewById(R.id.hero);
         // The hero is now a group (name, and the cinematic lines): without this every fade of the default
         // shelf would render it through an offscreen buffer first, as the glow above notes.
@@ -1975,9 +1977,67 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The shelf's text for this dock app: its name and, on the cinematic shelf, "Last opened" and the dots. */
     private void fillHero(int position, String label) {
         heroName.setText(label);
+        updateHeroBadge(position);
         if (!cinematic) return;
         updateHeroMeta(position);
         updateHeroDots(position);
+    }
+
+    private void updateHeroBadge(int position) {
+        if (heroBadge == null) return;
+        String pkg = adapter.packageAt(position);
+        if (pkg == null) {
+            heroBadge.setVisibility(View.GONE);
+            return;
+        }
+        String badge = getAppCategoryBadge(pkg);
+        if (badge != null && !badge.isEmpty()) {
+            heroBadge.setText(badge);
+            heroBadge.setVisibility(View.VISIBLE);
+        } else {
+            heroBadge.setVisibility(View.GONE);
+        }
+    }
+
+    private String getAppCategoryBadge(String pkg) {
+        if (pkg == null) return null;
+        String lower = pkg.toLowerCase(Locale.ROOT);
+        if (lower.contains("youtube") || lower.contains("netflix") || lower.contains("video") || lower.contains("stream")
+                || lower.contains("disney") || lower.contains("prime") || lower.contains("hotstar") || lower.contains("vlc")) {
+            return "CINEMA \u00B7 STREAMING";
+        }
+        if (lower.contains("browser") || lower.contains("chrome") || lower.contains("tvbro")) {
+            return "INTERNET \u00B7 BROWSER";
+        }
+        if (lower.contains("tvcenter") || lower.contains("tvplayer") || lower.contains("livetv") || lower.contains("tuner")) {
+            return "LIVE BROADCAST \u00B7 TV";
+        }
+        if (lower.contains("music") || lower.contains("spotify") || lower.contains("audio") || lower.contains("sound")) {
+            return "AUDIO \u00B7 MUSIC";
+        }
+        if (lower.contains("game") || lower.contains("arcade")) {
+            return "GAMES \u00B7 ENTERTAINMENT";
+        }
+        if (lower.contains("setting") || lower.contains("manage") || lower.contains("tools") || lower.contains("file")) {
+            return "SYSTEM \u00B7 UTILITY";
+        }
+        try {
+            PackageManager pm = getPackageManager();
+            ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                int cat = ai.category;
+                switch (cat) {
+                    case ApplicationInfo.CATEGORY_VIDEO: return "STREAMING \u00B7 VIDEO";
+                    case ApplicationInfo.CATEGORY_AUDIO: return "AUDIO \u00B7 MUSIC";
+                    case ApplicationInfo.CATEGORY_GAME: return "GAMES";
+                    case ApplicationInfo.CATEGORY_IMAGE: return "PHOTOS";
+                    case ApplicationInfo.CATEGORY_PRODUCTIVITY: return "PRODUCTIVITY";
+                    case ApplicationInfo.CATEGORY_NEWS: return "NEWS \u00B7 MEDIA";
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return "APPLICATION";
     }
 
     // ---- cinematic shelf -------------------------------------------------------------------------
@@ -3370,7 +3430,28 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             startActivity(view);
             return;
         } catch (ActivityNotFoundException | SecurityException e) {
+            // Xiaomi TV fallback: if standard channel intent fails, map directly to Xiaomi's ExternalSourceActivity
+            if (inputId != null) {
+                int miSource = -1;
+                String lower = inputId.toLowerCase(Locale.ROOT);
+                if (lower.contains("hdmi1") || lower.contains("hw5")) miSource = 23;
+                else if (lower.contains("hdmi2") || lower.contains("hw6")) miSource = 24;
+                else if (lower.contains("hdmi3") || lower.contains("hw7")) miSource = 25;
+                else if (lower.contains("av") || lower.contains("hw1")) miSource = 2;
+                if (miSource > 0) {
+                    try {
+                        startActivity(SystemSettings.xiaomiInputIntent(miSource));
+                        return;
+                    } catch (Exception ignored) {}
+                }
+            }
             if (inputAction.isEmpty()) {
+                // If TV has Xiaomi tvplayer, open its native external source picker
+                Intent picker = SystemSettings.xiaomiSourcePickerIntent();
+                if (getPackageManager().resolveActivity(picker, 0) != null) {
+                    startActivity(picker);
+                    return;
+                }
                 Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -3845,6 +3926,33 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Some firmware has no App info page at all; a row that only toasts "can't open" helps nobody.
         Intent info = SystemSettings.appInfo(this, pkg);
         if (info != null) addSettingsMenuRow(rows, popup, R.string.library_app_info, () -> open(info));
+        // JTV 2.0: Hold OK to Uninstall 3rd party apps
+        addSettingsMenuRow(rows, popup, R.string.uninstall, () -> {
+            try {
+                // MIUI TV & Android 9 explicit UninstallerActivity route:
+                Intent explicit = new Intent(Intent.ACTION_DELETE)
+                        .setComponent(new ComponentName("com.android.packageinstaller", "com.android.packageinstaller.UninstallerActivity"))
+                        .setData(Uri.parse("package:" + pkg))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(explicit);
+            } catch (Exception e) {
+                try {
+                    Intent delete = new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(delete);
+                } catch (Exception e2) {
+                    try {
+                        Intent uninstall = new Intent(Intent.ACTION_UNINSTALL_PACKAGE)
+                                .setData(Uri.parse("package:" + pkg))
+                                .putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(uninstall);
+                    } catch (Exception ignored) {
+                        Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
         panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         popup.setWidth(Math.max((int) (200 * density), panel.getMeasuredWidth()));
         // Dock tiles sit near the bottom of the screen: open the menu above the tile when it would not fit below.

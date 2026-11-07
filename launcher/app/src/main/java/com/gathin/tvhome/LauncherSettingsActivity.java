@@ -168,6 +168,48 @@ public final class LauncherSettingsActivity extends Activity {
             changed();
             refresh();
         });
+        findViewById(R.id.cleanRamChoice).setOnClickListener(v -> {
+            try {
+                System.gc();
+                android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                if (am != null) {
+                    android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
+                    am.getMemoryInfo(mi);
+                    long freeMb = mi.availMem / (1024 * 1024);
+                    Toast.makeText(this, getString(R.string.jtv_clean_ram_done, freeMb), Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception ignored) {}
+        });
+        findViewById(R.id.screenSaverChoice).setOnClickListener(v -> {
+            try {
+                Intent dreamSettings = new Intent("android.settings.DREAM_SETTINGS");
+                if (getPackageManager().resolveActivity(dreamSettings, 0) != null) {
+                    startActivity(dreamSettings);
+                } else {
+                    Intent aospSettings = SystemSettings.intent(this, Settings.ACTION_DISPLAY_SETTINGS);
+                    startActivity(aospSettings);
+                }
+            } catch (Exception ignored) {
+                Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+            }
+        });
+        findViewById(R.id.languageChoice).setOnClickListener(v -> {
+            String[] langs = {"Tiếng Việt (vi)", "English (en)", "Mặc định hệ thống / System default"};
+            String[] tags = {"vi", "en", ""};
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.jtv_language)
+                    .setItems(langs, (dialog, which) -> {
+                        choices.edit().putString("locale", tags[which]).apply();
+                        changed();
+                        Toast.makeText(this, "Đã lưu cài đặt ngôn ngữ / Language saved.", Toast.LENGTH_SHORT).show();
+                        recreate();
+                    })
+                    .show();
+        });
+        findViewById(R.id.appHubChoice).setOnClickListener(v ->
+                open(new Intent(this, AppHubActivity.class)));
+        findViewById(R.id.developerChoice).setOnClickListener(v ->
+                open(new Intent(this, DeveloperActivity.class)));
         findViewById(R.id.defaultHomeChoice).setOnClickListener(v ->
                 open(new Intent(this, HomeSettingsActivity.class)));
         findViewById(R.id.tvSettingsChoice).setOnClickListener(v ->
@@ -185,11 +227,18 @@ public final class LauncherSettingsActivity extends Activity {
 
     private void showWallpaperPicker() {
         File dir = Config.dir(this);
-        List<File> images = new java.util.ArrayList<>(WallpaperRotation.images(
-                dir == null ? null : new File(dir, "wallpapers")));
-        // A theme with a single wallpaper.jpg offers that picture too (Config maps the choice back to it).
-        File single = dir == null ? null : new File(dir, Config.WALLPAPER_NAME);
-        if (single != null && single.isFile()) images.add(0, single);
+        List<File> images = new java.util.ArrayList<>();
+        if (dir != null) {
+            images.addAll(WallpaperRotation.images(new File(dir, "wallpapers")));
+            File single = new File(dir, Config.WALLPAPER_NAME);
+            if (single.isFile()) images.add(0, single);
+        }
+        // Also scan external shared Pictures/Wallpapers if available
+        File extWallpapers = new File("/sdcard/Pictures");
+        if (extWallpapers.isDirectory()) {
+            images.addAll(WallpaperRotation.images(extWallpapers));
+        }
+
         String[] labels = new String[images.size() + 1];
         for (int i = 0; i < images.size(); i++) labels[i] = images.get(i).getName();
         labels[images.size()] = getString(R.string.wallpaper_none);
@@ -203,8 +252,16 @@ public final class LauncherSettingsActivity extends Activity {
                     if (which == images.size()) {
                         choices.edit().putString(Config.WALLPAPER_CHOICE_KEY, "none").apply();
                     } else {
-                        choices.edit().putString(Config.WALLPAPER_CHOICE_KEY,
-                                images.get(which).getName()).apply();
+                        File picked = images.get(which);
+                        // If picked from external pictures, copy to theme dir so it survives and displays
+                        if (dir != null && !picked.getParentFile().equals(dir) && !picked.getParentFile().equals(new File(dir, "wallpapers"))) {
+                            try {
+                                File target = new File(new File(dir, "wallpapers"), picked.getName());
+                                target.getParentFile().mkdirs();
+                                java.nio.file.Files.copy(picked.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            } catch (Exception ignored) {}
+                        }
+                        choices.edit().putString(Config.WALLPAPER_CHOICE_KEY, picked.getName()).apply();
                     }
                     changed();
                     Toast.makeText(this, R.string.wallpaper_applied, Toast.LENGTH_SHORT).show();

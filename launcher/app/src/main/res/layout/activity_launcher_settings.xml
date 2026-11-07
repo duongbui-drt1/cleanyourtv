@@ -151,6 +151,36 @@
             android:textSize="14sp" />
 
         <TextView
+            android:id="@+id/cleanRamChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="28dp"
+            android:text="@string/jtv_clean_ram" />
+
+        <TextView
+            android:id="@+id/screenSaverChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="18dp"
+            android:text="@string/jtv_screensaver" />
+
+        <TextView
+            android:id="@+id/languageChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="18dp"
+            android:text="@string/jtv_language" />
+
+        <TextView
+            android:id="@+id/appHubChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="28dp"
+            android:text="@string/juong_app_hub" />
+
+        <TextView
+            android:id="@+id/developerChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="18dp"
+            android:text="@string/developer_mode" />
+
+        <TextView
             android:id="@+id/defaultHomeChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="28dp"

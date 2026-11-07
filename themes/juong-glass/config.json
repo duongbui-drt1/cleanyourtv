@@ -1,0 +1,24 @@
+{
+  "dock_apps": [
+    "com.google.android.youtube.tv",
+    "com.teamsmart.videomanager.tv",
+    "com.netflix.ninja",
+    "io.github.truefedex.tvbro",
+    "com.amazon.amazonvideo.livingroom",
+    "org.videolan.vlc"
+  ],
+  "background_color": "#070A0F",
+  "wallpaper": true,
+  "cinematic_home": true,
+  "dock_glass": true,
+  "dock_opacity": 65,
+  "app_glow": true,
+  "glow_style": "horizon",
+  "accent_color": "#00D2FF",
+  "focus_overshoot": false,
+  "icon_only_buttons": true,
+  "advanced_effects": true,
+  "show_inputs_pill": true,
+  "show_network_pill": true,
+  "columns": 6
+}

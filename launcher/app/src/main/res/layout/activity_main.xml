@@ -113,7 +113,7 @@
         android:visibility="gone"
         android:importantForAccessibility="no" />
 
-    <!-- Top shelf: the focused dock app's name, positioned above the dock in code. -->
+    <!-- Top shelf: the focused dock app's name and category badge, positioned above the dock in code. -->
     <LinearLayout
         android:id="@+id/hero"
         android:layout_width="wrap_content"
@@ -122,15 +122,34 @@
         android:orientation="vertical"
         android:alpha="0">
 
+        <!-- JUONG Spatial Category / Cue Badge -->
+        <TextView
+            android:id="@+id/heroBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="4dp"
+            android:singleLine="true"
+            android:textColor="@color/juong_accent_cyan"
+            android:textSize="12sp"
+            android:fontFamily="@string/font_medium"
+            android:letterSpacing="0.18"
+            android:textAllCaps="true"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/heroName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFFFF"
+            android:textColor="@color/juong_text_primary"
             android:textSize="48sp"
             android:fontFamily="@string/font_light"
             android:letterSpacing="-0.02"
             android:includeFontPadding="false"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="8"
             android:singleLine="true" />
 
         <!-- Cinematic shelf only: when the app was last opened, and the dock position dots. -->
@@ -139,11 +158,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:singleLine="true"
-            android:textColor="#B3FFFFFF"
+            android:textColor="@color/juong_text_secondary"
             android:textSize="15sp"
             android:fontFamily="@string/font_light"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="4"
             android:visibility="gone" />
 
         <LinearLayout
@@ -151,7 +174,7 @@
             android:layout_width="wrap_content"
             android:layout_height="6dp"
             android:layout_marginStart="4dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:orientation="horizontal"
             android:visibility="gone" />
     </LinearLayout>

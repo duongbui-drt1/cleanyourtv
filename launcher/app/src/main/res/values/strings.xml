@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Home</string>
+    <string name="app_name">JUONG TV</string>
+    <string name="juong_tagline">Cinematic Spatial Android TV</string>
+    <string name="juong_control_center">Control Center</string>
+    <string name="juong_app_hub">JUONG App Hub</string>
+    <string name="juong_browser">TV Browser</string>
+    <string name="juong_quick_settings">Quick Settings</string>
+    <string name="juong_developer_mode">Developer Mode</string>
     <string name="inputs">Inputs</string>
     <string name="wifi">Wi-Fi</string>
     <string name="settings">Settings</string>
@@ -69,8 +75,13 @@
     <string name="tv_settings">TV system settings</string>
     <string name="quick_picture">Display</string>
     <string name="quick_network">Network</string>
+    <string name="quick_bluetooth">Bluetooth &amp; Remotes</string>
+    <string name="quick_sound">Sound &amp; Audio</string>
+    <string name="quick_hdmi">HDMI %1$d</string>
     <string name="quick_apps">Apps</string>
     <string name="quick_apps_hint">Re-enable</string>
+    <string name="developer_mode">Developer Mode</string>
+    <string name="developer_mode_desc">Device diagnostics, hardware specs and ADB status</string>
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="enable">Enable</string>
@@ -115,6 +126,15 @@
     <string name="library_remove_shortcut">Remove from Home</string>
     <string name="library_open">Open</string>
     <string name="library_app_info">App info</string>
+    <string name="uninstall">Uninstall</string>
+    <string name="jtv_clean_ram">Clear Memory</string>
+    <string name="jtv_clean_ram_done">Memory cleared: %1$d MB free</string>
+    <string name="jtv_switch_default_home">Switch to Stock Launcher</string>
+    <string name="jtv_switch_default_home_hint">Restore or switch default launcher</string>
+    <string name="jtv_screensaver">Screen Saver</string>
+    <string name="jtv_screensaver_hint">Apple TV Minimal Clock &amp; Artwork</string>
+    <string name="jtv_language">Language / Ngôn ngữ</string>
+    <string name="jtv_language_hint">Switch English / Tiếng Việt</string>
     <string name="library_save_failed">Could not save the shortcut</string>
     <string name="library_recent">New · Add to Home</string>
     <string name="library_hint_add">Press to add to Home · Hold for options</string>

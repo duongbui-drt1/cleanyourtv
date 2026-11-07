@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Màn hình chính</string>
+    <string name="app_name">JUONG TV</string>
+    <string name="juong_tagline">Giao diện TV Đẳng Cấp Không Gian</string>
+    <string name="juong_control_center">Trung tâm điều khiển</string>
+    <string name="juong_app_hub">Kho ứng dụng JUONG</string>
+    <string name="juong_browser">Trình duyệt TV</string>
+    <string name="juong_quick_settings">Cài đặt nhanh</string>
+    <string name="juong_developer_mode">Chế độ Nhà phát triển</string>
     <string name="inputs">Nguồn vào</string>
     <string name="wifi">Wi-Fi</string>
     <string name="settings">Cài đặt</string>
@@ -42,8 +48,13 @@
     <string name="tv_settings">Cài đặt hệ thống TV</string>
     <string name="quick_picture">Hiển thị</string>
     <string name="quick_network">Mạng</string>
+    <string name="quick_bluetooth">Bluetooth &amp; Điều khiển</string>
+    <string name="quick_sound">Âm thanh</string>
+    <string name="quick_hdmi">Cổng HDMI %1$d</string>
     <string name="quick_apps">Ứng dụng</string>
     <string name="quick_apps_hint">Bật lại</string>
+    <string name="developer_mode">Chế độ Nhà phát triển</string>
+    <string name="developer_mode_desc">Thông số phần cứng, chẩn đoán bộ nhớ &amp; ADB</string>
     <string name="on">Bật</string>
     <string name="off">Tắt</string>
     <string name="enable">Bật</string>
@@ -98,6 +109,15 @@
     <string name="library_remove_shortcut">Bỏ khỏi màn hình chính</string>
     <string name="library_open">Mở</string>
     <string name="library_app_info">Thông tin ứng dụng</string>
+    <string name="uninstall">Gỡ cài đặt</string>
+    <string name="jtv_clean_ram">Dọn dẹp RAM</string>
+    <string name="jtv_clean_ram_done">Đã dọn dẹp RAM: Còn trống %1$d MB</string>
+    <string name="jtv_switch_default_home">Quay về Launcher mặc định</string>
+    <string name="jtv_switch_default_home_hint">Khôi phục hoặc chọn launcher khác</string>
+    <string name="jtv_screensaver">Màn hình chờ</string>
+    <string name="jtv_screensaver_hint">Đồng hồ tối giản phong cách Apple TV</string>
+    <string name="jtv_language">Ngôn ngữ / Language</string>
+    <string name="jtv_language_hint">Chuyển Tiếng Việt / English</string>
     <string name="library_save_failed">Không lưu được lối tắt</string>
     <string name="library_recent">Mới · Thêm vào màn hình chính</string>
     <string name="library_hint_add">Bấm để thêm vào màn hình chính · Giữ để xem tùy chọn</string>
