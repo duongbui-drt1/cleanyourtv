@@ -189,4 +189,9 @@
     <string name="jtv_accent_color">Interface Accent Color</string>
     <string name="jtv_performance_manager">TV Performance &amp; System Manager</string>
     <string name="jtv_performance_manager_desc">Monitor RAM, ROM, Amlogic CPU and 4K UHD Unlocker</string>
+    <string name="jtv_wallpaper_effect">Wallpaper Transition Effect</string>
+    <string name="jtv_wallpaper_duration">Wallpaper Transition Duration</string>
+    <string name="jtv_ambient_intensity">Ambient Color Intensity (App Focus)</string>
+    <string name="jtv_boot_logo">Launcher Boot Logo Animation</string>
+    <string name="jtv_top_logo">Top Center Brand Logo (128x128)</string>
 </resources>

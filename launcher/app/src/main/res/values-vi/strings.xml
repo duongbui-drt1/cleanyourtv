@@ -157,4 +157,9 @@
     <string name="jtv_accent_color">Màu chủ đạo giao diện</string>
     <string name="jtv_performance_manager">Quản lý &amp; Giám sát hiệu năng TV</string>
     <string name="jtv_performance_manager_desc">Theo dõi RAM, bộ nhớ, chip CPU và mở khóa 4K UHD</string>
+    <string name="jtv_wallpaper_effect">Hiệu ứng chuyển đổi hình nền</string>
+    <string name="jtv_wallpaper_duration">Thời gian thực hiện chuyển cảnh</string>
+    <string name="jtv_ambient_intensity">Độ đậm nhạt màu ambient khi chuyển app</string>
+    <string name="jtv_boot_logo">Hiển thị Boot Logo Launcher khi khởi động</string>
+    <string name="jtv_top_logo">Hiển thị Logo giữa màn hình (128x128)</string>
 </resources>

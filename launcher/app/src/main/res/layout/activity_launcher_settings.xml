@@ -120,6 +120,31 @@
             android:layout_marginTop="10dp" />
 
         <TextView
+            android:id="@+id/wallpaperEffectChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/wallpaperDurationChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/ambientIntensityChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/bootLogoChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/topLogoChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
             android:id="@+id/customGreetingChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="10dp" />

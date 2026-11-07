@@ -36,6 +36,11 @@ public final class LauncherSettingsActivity extends Activity {
     private final TextView[] clockChoices = new TextView[CLOCK_FORMATS.length];
     private TextView wallpaperChoice;
     private TextView wallpaperIntervalChoice;
+    private TextView wallpaperEffectChoice;
+    private TextView wallpaperDurationChoice;
+    private TextView ambientIntensityChoice;
+    private TextView bootLogoChoice;
+    private TextView topLogoChoice;
     private TextView customGreetingChoice;
     private TextView wifiPillChoice;
     private TextView lunarChoice;
@@ -134,6 +139,21 @@ public final class LauncherSettingsActivity extends Activity {
 
         wallpaperIntervalChoice = findViewById(R.id.wallpaperIntervalChoice);
         wallpaperIntervalChoice.setOnClickListener(v -> showWallpaperIntervalPicker());
+
+        wallpaperEffectChoice = findViewById(R.id.wallpaperEffectChoice);
+        wallpaperEffectChoice.setOnClickListener(v -> showWallpaperEffectPicker());
+
+        wallpaperDurationChoice = findViewById(R.id.wallpaperDurationChoice);
+        wallpaperDurationChoice.setOnClickListener(v -> showWallpaperDurationPicker());
+
+        ambientIntensityChoice = findViewById(R.id.ambientIntensityChoice);
+        ambientIntensityChoice.setOnClickListener(v -> showAmbientIntensityPicker());
+
+        bootLogoChoice = findViewById(R.id.bootLogoChoice);
+        bootLogoChoice.setOnClickListener(v -> toggleBootLogo());
+
+        topLogoChoice = findViewById(R.id.topLogoChoice);
+        topLogoChoice.setOnClickListener(v -> toggleTopLogo());
 
         customGreetingChoice = findViewById(R.id.customGreetingChoice);
         customGreetingChoice.setOnClickListener(v -> showCustomGreetingDialog());
@@ -295,6 +315,108 @@ public final class LauncherSettingsActivity extends Activity {
                 .show();
     }
 
+    private static final String[] WALLPAPER_EFFECT_KEYS = {
+            "crossfade", "blur", "zoom", "slide", "glass", "sweep", "ken_burns"
+    };
+    private static final String[] WALLPAPER_EFFECT_LABELS = {
+            "Crossfade (Chuyển mờ dần kinh điển)",
+            "Blur Transition (Làm mờ chuyển cảnh sâu)",
+            "Zoom Transition (Thu phóng không gian 3D)",
+            "Slide Transition (Trượt ngang Cinematic)",
+            "Glass Layers (Lớp kính mờ nghệ thuật)",
+            "Light Sweep (Quét ánh sáng phản chiếu)",
+            "Ken Burns (Lướt lia ảnh điện ảnh)"
+    };
+
+    private void showWallpaperEffectPicker() {
+        String current = choices.getString("wallpaper_effect", "crossfade");
+        int checked = 0;
+        for (int i = 0; i < WALLPAPER_EFFECT_KEYS.length; i++) {
+            if (WALLPAPER_EFFECT_KEYS[i].equalsIgnoreCase(current)) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_wallpaper_effect)
+                .setSingleChoiceItems(WALLPAPER_EFFECT_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putString("wallpaper_effect", WALLPAPER_EFFECT_KEYS[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private static final int[] WALLPAPER_DURATIONS = {400, 800, 1200, 1800, 2500, 3500};
+    private static final String[] WALLPAPER_DURATION_LABELS = {
+            "0.4 giây (Rất nhanh)", "0.8 giây (Nhanh)", "1.2 giây (Mặc định)",
+            "1.8 giây (Mượt mà)", "2.5 giây (Điện ảnh)", "3.5 giây (Siêu êm ái)"
+    };
+
+    private void showWallpaperDurationPicker() {
+        int current = choices.getInt("wallpaper_transition_duration", 1200);
+        int checked = 2;
+        for (int i = 0; i < WALLPAPER_DURATIONS.length; i++) {
+            if (WALLPAPER_DURATIONS[i] == current) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_wallpaper_duration)
+                .setSingleChoiceItems(WALLPAPER_DURATION_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putInt("wallpaper_transition_duration", WALLPAPER_DURATIONS[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private static final int[] AMBIENT_INTENSITIES = {10, 25, 45, 70, 100};
+    private static final String[] AMBIENT_INTENSITY_LABELS = {
+            "10% (Siêu nhẹ / Tinh tế)", "25% (Nhẹ dịu)", "45% (Vừa phải)",
+            "70% (Đậm rõ)", "100% (Mặc định / Rực rỡ)"
+    };
+
+    private void showAmbientIntensityPicker() {
+        int current = choices.getInt("ambient_intensity", 100);
+        int checked = 4;
+        for (int i = 0; i < AMBIENT_INTENSITIES.length; i++) {
+            if (AMBIENT_INTENSITIES[i] == current) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_ambient_intensity)
+                .setSingleChoiceItems(AMBIENT_INTENSITY_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putInt("ambient_intensity", AMBIENT_INTENSITIES[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void toggleBootLogo() {
+        boolean show = choices.getBoolean("show_boot_logo", true);
+        choices.edit().putBoolean("show_boot_logo", !show).apply();
+        changed();
+        refresh();
+    }
+
+    private void toggleTopLogo() {
+        boolean show = choices.getBoolean("show_top_logo", false);
+        choices.edit().putBoolean("show_top_logo", !show).apply();
+        changed();
+        refresh();
+    }
+
     private void toggleWifiPill() {
         boolean show = choices.getBoolean("show_network_pill", true);
         choices.edit().putBoolean("show_network_pill", !show).apply();
@@ -310,10 +432,12 @@ public final class LauncherSettingsActivity extends Activity {
     }
 
     private static final String[] CLOCK_FONT_KEYS = {
-            "default", "inter", "space_grotesk", "roboto", "din", "bebas_neue"
+            "default", "inter", "space_grotesk", "roboto", "din", "bebas_neue",
+            "righteous", "audiowide", "orbitron", "comfortaa", "press_start_2p"
     };
     private static final String[] CLOCK_FONT_LABELS = {
-            "Mặc định (Outfit / System)", "Inter", "SF Pro / Space Grotesk", "Roboto", "DIN / DIN Next", "Bebas Neue (Số điện ảnh)"
+            "Mặc định (Outfit / System)", "Inter", "SF Pro / Space Grotesk", "Roboto", "DIN / DIN Next", "Bebas Neue (Số điện ảnh)",
+            "Righteous (Hiện đại / Tươi mới)", "Audiowide (Cyberpunk / Công nghệ)", "Orbitron (Sci-Fi / Vũ trụ)", "Comfortaa (Bo tròn / Tinh tế)", "Press Start 2P (Pixel Arcade 8-bit)"
     };
 
     private void showClockFontPicker() {
@@ -517,6 +641,28 @@ public final class LauncherSettingsActivity extends Activity {
         int interval = choices.getInt("wallpaper_rotation_minutes", 30);
         String intervalText = interval == 0 ? "Tắt tự động đổi" : interval + " phút";
         wallpaperIntervalChoice.setText(getString(R.string.jtv_wallpaper_interval) + ": " + intervalText);
+
+        String effect = choices.getString("wallpaper_effect", "crossfade");
+        String effectLabel = "Crossfade";
+        for (int i = 0; i < WALLPAPER_EFFECT_KEYS.length; i++) {
+            if (WALLPAPER_EFFECT_KEYS[i].equalsIgnoreCase(effect)) {
+                effectLabel = WALLPAPER_EFFECT_LABELS[i];
+                break;
+            }
+        }
+        wallpaperEffectChoice.setText(getString(R.string.jtv_wallpaper_effect) + ": " + effectLabel);
+
+        int duration = choices.getInt("wallpaper_transition_duration", 1200);
+        wallpaperDurationChoice.setText(getString(R.string.jtv_wallpaper_duration) + ": " + (duration / 1000f) + "s");
+
+        int ambientInt = choices.getInt("ambient_intensity", 100);
+        ambientIntensityChoice.setText(getString(R.string.jtv_ambient_intensity) + ": " + ambientInt + "%");
+
+        boolean showBoot = choices.getBoolean("show_boot_logo", true);
+        bootLogoChoice.setText(getString(R.string.jtv_boot_logo) + ": " + (showBoot ? getString(R.string.on) : getString(R.string.off)));
+
+        boolean showTop = choices.getBoolean("show_top_logo", false);
+        topLogoChoice.setText(getString(R.string.jtv_top_logo) + ": " + (showTop ? getString(R.string.on) : getString(R.string.off)));
 
         String greetingName = choices.getString("custom_greeting_name", "");
         customGreetingChoice.setText(getString(R.string.jtv_custom_greeting) + ": "

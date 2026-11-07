@@ -434,4 +434,33 @@
         android:layout_height="10dp"
         android:alpha="0"
         android:importantForAccessibility="no" />
+
+    <!-- Top center brand logo (128x128), toggled by user preference -->
+    <ImageView
+        android:id="@+id/topLogo"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="20dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:importantForAccessibility="no" />
+
+    <!-- Launcher Boot Logo full-screen overlay for animated startup -->
+    <FrameLayout
+        android:id="@+id/bootLogoOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FF000000"
+        android:visibility="gone"
+        android:importantForAccessibility="no">
+
+        <ImageView
+            android:id="@+id/bootLogoImage"
+            android:layout_width="450dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:importantForAccessibility="no" />
+    </FrameLayout>
 </FrameLayout>

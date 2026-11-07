@@ -33,11 +33,15 @@ import java.util.concurrent.Executors;
 final class WallpaperPlayer {
     private final FrameLayout root;
     private final ImageView image;
+    private final ImageView nextImage;
+    private final View sweepOverlay;
+    private final Context context;
     private final int backgroundColor;
     private final List<File> files;
     private final long interval;
     private final String order;
     private final SharedPreferences preferences;
+    private final SharedPreferences choices;
     private final ExecutorService decoder = Executors.newSingleThreadExecutor();
     private final Random random = new Random();
     private final int width;
@@ -63,6 +67,7 @@ final class WallpaperPlayer {
     private int[] sun;
 
     WallpaperPlayer(Context context, FrameLayout root, Config config) {
+        this.context = context;
         this.root = root;
         backgroundColor = config.backgroundColor;
         files = new ArrayList<>(config.wallpapers);
@@ -72,6 +77,7 @@ final class WallpaperPlayer {
         dimColor = config.wallpaperDim > 0 ? (config.wallpaperDim * 255 / 100) << 24 : 0;
         order = config.wallpaperOrder;
         preferences = context.getSharedPreferences("wallpaper_rotation", Context.MODE_PRIVATE);
+        choices = context.getSharedPreferences("choices", Context.MODE_PRIVATE);
         moods = config.wallpaperMoods;
         latitude = moods.isEmpty() ? "" : context.getString(R.string.latitude);
         longitude = moods.isEmpty() ? "" : context.getString(R.string.longitude);
@@ -85,14 +91,31 @@ final class WallpaperPlayer {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         width = metrics.widthPixels;
         height = metrics.heightPixels;
+
         image = new ImageView(context);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
         image.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+
+        nextImage = new ImageView(context);
+        nextImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        nextImage.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        nextImage.setVisibility(View.GONE);
+
+        sweepOverlay = new View(context);
+        sweepOverlay.setBackgroundColor(0xFFFFFFFF);
+        sweepOverlay.setAlpha(0f);
+        sweepOverlay.setVisibility(View.GONE);
+        sweepOverlay.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+
         names = config.wallpaperCaptions && config.wallpaperEnabled && !files.isEmpty()
                 ? WallpaperCaptions.read(files.get(0).getParentFile()) : Collections.emptyMap();
         caption = names.isEmpty() ? null : makeCaption(context, root);
         if (config.wallpaperEnabled && !files.isEmpty()) {
             root.addView(image, 0, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            root.addView(nextImage, 1, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            root.addView(sweepOverlay, 2, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             showFirst();
         }
@@ -263,10 +286,84 @@ final class WallpaperPlayer {
     private void show(Bitmap bitmap) {
         Bitmap old = current;
         current = bitmap;
-        // The wallpaper covers the whole root; avoid drawing the fallback colour under it.
         root.setBackground(null);
-        image.setImageBitmap(bitmap);
-        if (old != null && old != bitmap) image.postDelayed(old::recycle, 500);
+
+        // If first display or no previous image, set directly
+        if (old == null || old == bitmap) {
+            image.setImageBitmap(bitmap);
+            image.setAlpha(1f);
+            image.setScaleX(1f);
+            image.setScaleY(1f);
+            image.setTranslationX(0f);
+            return;
+        }
+
+        String effect = choices.getString("wallpaper_effect", "crossfade");
+        int durationMs = choices.getInt("wallpaper_transition_duration", 1200);
+
+        // Setup nextImage
+        nextImage.setImageBitmap(bitmap);
+        nextImage.setVisibility(View.VISIBLE);
+        nextImage.setAlpha(0f);
+        nextImage.setScaleX(1f);
+        nextImage.setScaleY(1f);
+        nextImage.setTranslationX(0f);
+        nextImage.animate().cancel();
+        image.animate().cancel();
+        sweepOverlay.animate().cancel();
+
+        Runnable onComplete = () -> {
+            image.setImageBitmap(bitmap);
+            image.setAlpha(1f);
+            image.setScaleX(1f);
+            image.setScaleY(1f);
+            image.setTranslationX(0f);
+            nextImage.setVisibility(View.GONE);
+            nextImage.setImageDrawable(null);
+            sweepOverlay.setVisibility(View.GONE);
+            sweepOverlay.setAlpha(0f);
+            if (old != bitmap) image.postDelayed(old::recycle, 500);
+        };
+
+        if ("slide".equalsIgnoreCase(effect)) {
+            // Slide transition: old slides left, new slides in from right
+            nextImage.setTranslationX((float) width);
+            nextImage.setAlpha(1f);
+            image.animate().translationX((float) -width).setDuration(durationMs).start();
+            nextImage.animate().translationX(0f).setDuration(durationMs).withEndAction(onComplete).start();
+        } else if ("zoom".equalsIgnoreCase(effect)) {
+            // Zoom transition: old scales up and fades out, new scales from 0.85 to 1.0
+            nextImage.setScaleX(0.85f);
+            nextImage.setScaleY(0.85f);
+            image.animate().scaleX(1.15f).scaleY(1.15f).alpha(0f).setDuration(durationMs).start();
+            nextImage.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(durationMs).withEndAction(onComplete).start();
+        } else if ("blur".equalsIgnoreCase(effect) || "glass".equalsIgnoreCase(effect)) {
+            // Blur / Glass layers: crossfade with subtle scale compression and depth
+            nextImage.setScaleX(1.05f);
+            nextImage.setScaleY(1.05f);
+            image.animate().alpha(0.2f).scaleX(0.96f).scaleY(0.96f).setDuration(durationMs).start();
+            nextImage.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(durationMs).withEndAction(onComplete).start();
+        } else if ("sweep".equalsIgnoreCase(effect)) {
+            // Light sweep: white ambient sweep flash during crossfade
+            sweepOverlay.setVisibility(View.VISIBLE);
+            sweepOverlay.setAlpha(0f);
+            int half = durationMs / 2;
+            sweepOverlay.animate().alpha(0.45f).setDuration(half).withEndAction(() -> {
+                nextImage.setAlpha(1f);
+                sweepOverlay.animate().alpha(0f).setDuration(half).withEndAction(onComplete).start();
+            }).start();
+        } else if ("ken_burns".equalsIgnoreCase(effect)) {
+            // Ken Burns: slow cinematic pan & zoom drift into new image
+            nextImage.setScaleX(1.10f);
+            nextImage.setScaleY(1.10f);
+            nextImage.setTranslationX((float) (width * 0.03));
+            image.animate().alpha(0f).setDuration((long)(durationMs * 0.8)).start();
+            nextImage.animate().alpha(1f).scaleX(1f).scaleY(1f).translationX(0f).setDuration((long)(durationMs * 1.5)).withEndAction(onComplete).start();
+        } else {
+            // Default: Crossfade
+            image.animate().alpha(0f).setDuration(durationMs).start();
+            nextImage.animate().alpha(1f).setDuration(durationMs).withEndAction(onComplete).start();
+        }
     }
 
     private Bitmap decode(File file) {

@@ -158,6 +158,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** config.xml ambient_glow, overridable by a theme. Off: the glow view is gone and no fade or colour animator
      *  is started for it, so a focus move costs nothing extra on a launcher that runs all day. */
     private boolean ambientGlow;
+    private float ambientMaxAlpha = 1.0f;
     /** config.xml app_glow: the highlight takes the focused app's colour on every tile. */
     private boolean appGlow;
     /** config.xml glow_style: the shape setAmbient paints the glow mask in. */
@@ -458,6 +459,57 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         applyCustomFonts();
+        SharedPreferences choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
+
+        // 1. Top center brand logo (origin (black).png 128x128)
+        ImageView topLogo = findViewById(R.id.topLogo);
+        if (topLogo != null) {
+            boolean showTopLogo = choices.getBoolean("show_top_logo", false);
+            if (showTopLogo) {
+                Bitmap bmp = loadExternalBitmap("top_logo.png");
+                if (bmp != null) {
+                    topLogo.setImageBitmap(bmp);
+                    topLogo.setVisibility(View.VISIBLE);
+                } else {
+                    topLogo.setVisibility(View.GONE);
+                }
+            } else {
+                topLogo.setVisibility(View.GONE);
+            }
+        }
+
+        // 2. Launcher Boot Logo Animation (Single Color (black).png)
+        View bootLogoOverlay = findViewById(R.id.bootLogoOverlay);
+        ImageView bootLogoImage = findViewById(R.id.bootLogoImage);
+        if (bootLogoOverlay != null && bootLogoImage != null) {
+            boolean showBootLogo = choices.getBoolean("show_boot_logo", true);
+            if (showBootLogo && savedInstanceState == null) {
+                Bitmap bootBmp = loadExternalBitmap("boot_logo.png");
+                if (bootBmp != null) {
+                    bootLogoImage.setImageBitmap(bootBmp);
+                    bootLogoOverlay.setVisibility(View.VISIBLE);
+                    bootLogoImage.setAlpha(0f);
+                    bootLogoImage.setScaleX(0.8f);
+                    bootLogoImage.setScaleY(0.8f);
+                    bootLogoImage.animate()
+                            .alpha(1f)
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(800)
+                            .withEndAction(() -> bootLogoOverlay.animate()
+                                    .alpha(0f)
+                                    .setDuration(600)
+                                    .setStartDelay(600)
+                                    .withEndAction(() -> bootLogoOverlay.setVisibility(View.GONE))
+                                    .start())
+                            .start();
+                } else {
+                    bootLogoOverlay.setVisibility(View.GONE);
+                }
+            } else {
+                bootLogoOverlay.setVisibility(View.GONE);
+            }
+        }
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
         Config cfg = Config.load(this);
@@ -520,6 +572,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // a fade renders it into a full-screen offscreen buffer first.
         ambient.forceHasOverlappingRendering(false);
         ambientGlow = cfg.ambientGlow;
+        int ambientIntensity = choices.getInt("ambient_intensity", 100);
+        ambientMaxAlpha = Math.max(0.05f, Math.min(1.0f, ambientIntensity / 100f));
         glowSnap = cfg.glowSnap;
         appGlow = cfg.appGlow;
         if (!ambientGlow) ambient.setVisibility(View.GONE);
@@ -1925,7 +1979,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             hero.setAlpha(1f);
             if (ambientGlow) {
                 setAmbient(color);
-                ambient.setAlpha(1f);
+                ambient.setAlpha(ambientMaxAlpha);
             }
             heroShown = true;
             return;
@@ -1941,7 +1995,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             hero.animate().alpha(1f).setDuration(260).start();
             if (ambientGlow) {
                 setAmbient(color);
-                ambient.animate().alpha(1f).setDuration(600).start();
+                ambient.animate().alpha(ambientMaxAlpha).setDuration(600).start();
             }
             heroShown = true;
         } else if (changed) {
@@ -1957,11 +2011,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             } else if (ambientGlow && color != ambientColor && glowSnap) {
                 ambient.animate().cancel();
                 setAmbient(color);
-                ambient.setAlpha(1f);
+                ambient.setAlpha(ambientMaxAlpha);
             } else if (ambientGlow && color != ambientColor) {
-                ambient.animate().alpha(0.35f).setDuration(200).withEndAction(() -> {
+                ambient.animate().alpha(0.35f * ambientMaxAlpha).setDuration(200).withEndAction(() -> {
                     setAmbient(color);
-                    ambient.animate().alpha(1f).setDuration(500).start();
+                    ambient.animate().alpha(ambientMaxAlpha).setDuration(500).start();
                 }).start();
             }
         } else {
@@ -1969,8 +2023,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // onPause cancels the fade-ins, and a second Home during one lands on the same tile, which starts none:
             // finish them, or the shelf and the glow stay dim until focus moves to another app.
             if (hero.getAlpha() < 1f) hero.animate().alpha(1f).setDuration(260).start();
-            if (ambientGlow && color == ambientColor && ambient.getAlpha() < 1f) {
-                ambient.animate().alpha(1f).setDuration(600).start();
+            if (ambientGlow && color == ambientColor && ambient.getAlpha() < ambientMaxAlpha) {
+                ambient.animate().alpha(ambientMaxAlpha).setDuration(600).start();
             }
         }
     }
@@ -2224,10 +2278,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         stopAmbientAnimation();
         ambient.animate().cancel();
         if (color == ambientColor) {
-            ambient.animate().alpha(1f).setDuration(180).start();
+            ambient.animate().alpha(ambientMaxAlpha).setDuration(180).start();
             return;
         }
-        ambient.animate().alpha(1f).setDuration(180).start();
+        ambient.animate().alpha(ambientMaxAlpha).setDuration(180).start();
         ambientAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), ambientColor, color);
         ambientAnimator.setDuration(360);
         ambientAnimator.addUpdateListener(animation -> setAmbient((int) animation.getAnimatedValue()));
@@ -2257,22 +2311,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (!ambientGlow) return;
         if (!animations || reducedMotion) {
             setAmbient(color);
-            ambient.setAlpha(1f);
+            ambient.setAlpha(ambientMaxAlpha);
             return;
         }
         if (color == ambientColor && ambient.getBackground() != null) {
-            ambient.animate().alpha(1f).setDuration(300).start();
+            ambient.animate().alpha(ambientMaxAlpha).setDuration(300).start();
             return;
         }
         if (glowSnap) {
             setAmbient(color);
-            ambient.setAlpha(1f);
+            ambient.setAlpha(ambientMaxAlpha);
             return;
         }
         // The same dip-and-swap as the dock's top shelf.
-        ambient.animate().alpha(0.35f).setDuration(ambient.getAlpha() > 0.35f ? 200 : 0).withEndAction(() -> {
+        ambient.animate().alpha(0.35f * ambientMaxAlpha).setDuration(ambient.getAlpha() > (0.35f * ambientMaxAlpha) ? 200 : 0).withEndAction(() -> {
             setAmbient(color);
-            ambient.animate().alpha(1f).setDuration(500).start();
+            ambient.animate().alpha(ambientMaxAlpha).setDuration(500).start();
         }).start();
     }
 
@@ -2819,6 +2873,24 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    private Bitmap loadExternalBitmap(String filename) {
+        File[] candidates = {
+                new File(getExternalFilesDir(null), filename),
+                new File("/sdcard/Android/data/com.gathin.tvhome/files", filename),
+                new File("/sdcard/Pictures", filename),
+                new File(getFilesDir(), filename)
+        };
+        for (File f : candidates) {
+            if (f.isFile()) {
+                try {
+                    Bitmap bmp = android.graphics.BitmapFactory.decodeFile(f.getAbsolutePath());
+                    if (bmp != null) return bmp;
+                } catch (Exception ignored) {}
+            }
+        }
+        return null;
     }
 
     private void updateGreeting() {
