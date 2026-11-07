@@ -2,7 +2,7 @@
 title DIEU KHIEN MAN HINH XIAOMI TV (SCRCPY)
 cd /d "C:\Users\Juong\AppData\Local\Microsoft\WinGet\Packages\Genymobile.scrcpy_Microsoft.Winget.Source_8wekyb3d8bbwe\scrcpy-win64-v5.0.1"
 
-set "TV_IP=192.168.1.77"
+set "TV_IP=192.168.1.86"
 if not "%~1"=="" set "TV_IP=%~1"
 
 echo ==================================================================

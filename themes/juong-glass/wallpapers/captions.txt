@@ -1,0 +1,12 @@
+﻿# wallpaper_captions: <file><TAB><name>
+01-starry-lake.jpg	Starry Alpine Lake
+02-aurora-mountain.jpg	Aurora & Snowy Peak
+03-sunset-horizon.jpg	Sunset Horizon
+04-misty-forest.jpg	Misty Pine Forest
+05-coastal-cliff.jpg	Coastal Sea Cliff
+06-alpine-ridge.jpg	Alpine Mountain Ridge
+07-starry-pines.jpg	Starry Night Pines
+08-misty-peaks.jpg	Misty Mountain Peaks
+09-tropical-twilight.jpg	Tropical Twilight
+10-desert-dunes.jpg	Desert Sand Dunes
+11-wildflower-meadow.jpg	Wildflower Meadow

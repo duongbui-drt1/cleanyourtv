@@ -9,6 +9,8 @@
   ],
   "background_color": "#070A0F",
   "wallpaper": true,
+  "wallpaper_captions": true,
+  "wallpaper_rotation_minutes": 30,
   "cinematic_home": true,
   "dock_glass": true,
   "dock_opacity": 65,
