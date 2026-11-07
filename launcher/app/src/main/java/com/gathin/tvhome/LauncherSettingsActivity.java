@@ -40,10 +40,14 @@ public final class LauncherSettingsActivity extends Activity {
     private TextView wallpaperDurationChoice;
     private TextView ambientIntensityChoice;
     private TextView bootLogoChoice;
+    private TextView bootLogoDurationChoice;
     private TextView topLogoChoice;
     private TextView customGreetingChoice;
     private TextView wifiPillChoice;
+    private TextView powerPillChoice;
     private TextView lunarChoice;
+    private TextView calendarWidgetChoice;
+    private TextView weatherWidgetChoice;
     private TextView clockFontChoice;
     private TextView dateFontChoice;
     private TextView animationsChoice;
@@ -152,6 +156,9 @@ public final class LauncherSettingsActivity extends Activity {
         bootLogoChoice = findViewById(R.id.bootLogoChoice);
         bootLogoChoice.setOnClickListener(v -> toggleBootLogo());
 
+        bootLogoDurationChoice = findViewById(R.id.bootLogoDurationChoice);
+        bootLogoDurationChoice.setOnClickListener(v -> showBootLogoDurationPicker());
+
         topLogoChoice = findViewById(R.id.topLogoChoice);
         topLogoChoice.setOnClickListener(v -> toggleTopLogo());
 
@@ -161,8 +168,17 @@ public final class LauncherSettingsActivity extends Activity {
         wifiPillChoice = findViewById(R.id.wifiPillChoice);
         wifiPillChoice.setOnClickListener(v -> toggleWifiPill());
 
+        powerPillChoice = findViewById(R.id.powerPillChoice);
+        powerPillChoice.setOnClickListener(v -> togglePowerPill());
+
         lunarChoice = findViewById(R.id.lunarChoice);
         lunarChoice.setOnClickListener(v -> toggleLunarDate());
+
+        calendarWidgetChoice = findViewById(R.id.calendarWidgetChoice);
+        calendarWidgetChoice.setOnClickListener(v -> toggleCalendarWidget());
+
+        weatherWidgetChoice = findViewById(R.id.weatherWidgetChoice);
+        weatherWidgetChoice.setOnClickListener(v -> toggleWeatherWidget());
 
         clockFontChoice = findViewById(R.id.clockFontChoice);
         clockFontChoice.setOnClickListener(v -> showClockFontPicker());
@@ -410,6 +426,32 @@ public final class LauncherSettingsActivity extends Activity {
         refresh();
     }
 
+    private static final int[] BOOT_LOGO_DURATIONS = {0, 1, 2, 3, 5, 7, 10};
+    private static final String[] BOOT_LOGO_DURATION_LABELS = {
+            "0s (Tắt / Ngay lập tức)", "1 giây", "2 giây (Mặc định)", "3 giây", "5 giây", "7 giây", "10 giây"
+    };
+
+    private void showBootLogoDurationPicker() {
+        int current = choices.getInt("boot_logo_duration", 2);
+        int checked = 2;
+        for (int i = 0; i < BOOT_LOGO_DURATIONS.length; i++) {
+            if (BOOT_LOGO_DURATIONS[i] == current) {
+                checked = i;
+                break;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.jtv_boot_logo_duration)
+                .setSingleChoiceItems(BOOT_LOGO_DURATION_LABELS, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    choices.edit().putInt("boot_logo_duration", BOOT_LOGO_DURATIONS[which]).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private void toggleTopLogo() {
         boolean show = choices.getBoolean("show_top_logo", false);
         choices.edit().putBoolean("show_top_logo", !show).apply();
@@ -424,9 +466,30 @@ public final class LauncherSettingsActivity extends Activity {
         refresh();
     }
 
+    private void togglePowerPill() {
+        boolean show = choices.getBoolean("show_power_pill", true);
+        choices.edit().putBoolean("show_power_pill", !show).apply();
+        changed();
+        refresh();
+    }
+
     private void toggleLunarDate() {
         boolean lunar = choices.getBoolean("lunar_date", false);
         choices.edit().putBoolean("lunar_date", !lunar).apply();
+        changed();
+        refresh();
+    }
+
+    private void toggleCalendarWidget() {
+        boolean cal = choices.getBoolean("show_calendar_widget", false);
+        choices.edit().putBoolean("show_calendar_widget", !cal).apply();
+        changed();
+        refresh();
+    }
+
+    private void toggleWeatherWidget() {
+        boolean weather = choices.getBoolean("show_weather_widget", true);
+        choices.edit().putBoolean("show_weather_widget", !weather).apply();
         changed();
         refresh();
     }
@@ -462,10 +525,13 @@ public final class LauncherSettingsActivity extends Activity {
     }
 
     private static final String[] DATE_FONT_KEYS = {
-            "default", "inter", "manrope", "ibm_plex_sans", "nunito_sans"
+            "default", "inter", "manrope", "ibm_plex_sans", "nunito_sans",
+            "cabin", "quicksand", "outfit_custom", "montserrat", "playfair_display"
     };
     private static final String[] DATE_FONT_LABELS = {
-            "Mặc định (Default)", "Inter", "Manrope", "IBM Plex Sans", "Nunito Sans"
+            "Mặc định (Default)", "Inter", "Manrope", "IBM Plex Sans", "Nunito Sans",
+            "Cabin (Hiện đại, bo tròn)", "Quicksand (Nhẹ nhàng, thanh lịch)", "Outfit (Công nghệ, tối giản)",
+            "Montserrat (Hiện đại, sang trọng)", "Playfair Display (Cổ điển, quý phái)"
     };
 
     private void showDateFontPicker() {
@@ -661,6 +727,10 @@ public final class LauncherSettingsActivity extends Activity {
         boolean showBoot = choices.getBoolean("show_boot_logo", true);
         bootLogoChoice.setText(getString(R.string.jtv_boot_logo) + ": " + (showBoot ? getString(R.string.on) : getString(R.string.off)));
 
+        int bootDur = choices.getInt("boot_logo_duration", 2);
+        String bootDurLabel = bootDur == 0 ? "Ngay lập tức (Tắt)" : bootDur + " giây";
+        bootLogoDurationChoice.setText(getString(R.string.jtv_boot_logo_duration) + ": " + bootDurLabel);
+
         boolean showTop = choices.getBoolean("show_top_logo", false);
         topLogoChoice.setText(getString(R.string.jtv_top_logo) + ": " + (showTop ? getString(R.string.on) : getString(R.string.off)));
 
@@ -671,8 +741,17 @@ public final class LauncherSettingsActivity extends Activity {
         boolean showWifi = choices.getBoolean("show_network_pill", true);
         wifiPillChoice.setText(getString(R.string.jtv_wifi_pill) + ": " + (showWifi ? getString(R.string.on) : getString(R.string.off)));
 
+        boolean showPower = choices.getBoolean("show_power_pill", true);
+        powerPillChoice.setText(getString(R.string.jtv_power_pill) + ": " + (showPower ? getString(R.string.on) : getString(R.string.off)));
+
         boolean showLunar = choices.getBoolean("lunar_date", false);
         lunarChoice.setText(getString(R.string.jtv_lunar_calendar) + ": " + (showLunar ? getString(R.string.on) : getString(R.string.off)));
+
+        boolean showCal = choices.getBoolean("show_calendar_widget", false);
+        calendarWidgetChoice.setText(getString(R.string.jtv_calendar_widget) + ": " + (showCal ? getString(R.string.on) : getString(R.string.off)));
+
+        boolean showWeather = choices.getBoolean("show_weather_widget", true);
+        weatherWidgetChoice.setText(getString(R.string.jtv_weather_widget) + ": " + (showWeather ? getString(R.string.on) : getString(R.string.off)));
 
         String clockFont = choices.getString("clock_font", "default");
         clockFontChoice.setText(getString(R.string.jtv_clock_font) + ": " + clockFont);

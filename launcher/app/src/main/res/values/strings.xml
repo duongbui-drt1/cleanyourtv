@@ -193,5 +193,14 @@
     <string name="jtv_wallpaper_duration">Wallpaper Transition Duration</string>
     <string name="jtv_ambient_intensity">Ambient Color Intensity (App Focus)</string>
     <string name="jtv_boot_logo">Launcher Boot Logo Animation</string>
+    <string name="jtv_boot_logo_duration">Boot Logo Duration</string>
     <string name="jtv_top_logo">Top Center Brand Logo (64x64)</string>
+    <string name="jtv_power_pill">Power / Standby / Reboot Pill</string>
+    <string name="jtv_calendar_widget">Calendar Widget</string>
+    <string name="jtv_weather_widget">Mini Weather Widget</string>
+    <string name="power">Power</string>
+    <string name="power_screen_off">Screen Off (Standby)</string>
+    <string name="power_reboot">Restart TV</string>
+    <string name="power_shutdown">Power Off TV</string>
+    <string name="power_dialog_title">Power Options</string>
 </resources>

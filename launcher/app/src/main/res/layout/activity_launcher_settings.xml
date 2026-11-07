@@ -140,6 +140,11 @@
             android:layout_marginTop="10dp" />
 
         <TextView
+            android:id="@+id/bootLogoDurationChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
             android:id="@+id/topLogoChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="10dp" />
@@ -155,7 +160,22 @@
             android:layout_marginTop="10dp" />
 
         <TextView
+            android:id="@+id/powerPillChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
             android:id="@+id/lunarChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/calendarWidgetChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/weatherWidgetChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="10dp" />
 

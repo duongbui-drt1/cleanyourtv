@@ -93,6 +93,14 @@ public class HomeKeyService extends AccessibilityService {
     /** The bound helper, so the opt-in broadcast can arm it without waiting for a new connection. */
     private static HomeKeyService running;
 
+    public static boolean performGlobal(int action) {
+        HomeKeyService s = running;
+        if (s != null) {
+            return s.performGlobalAction(action);
+        }
+        return false;
+    }
+
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();

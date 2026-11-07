@@ -3,7 +3,9 @@ package com.gathin.tvhome;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.accessibilityservice.AccessibilityService;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -141,6 +143,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private String sourcePanelExtra;
     private boolean coocaaSources;
 
+    private SharedPreferences choices;
     private AppAdapter adapter;
     private RecyclerView grid;
     private FrameLayout root;
@@ -458,8 +461,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         applyCustomFonts();
-        SharedPreferences choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
 
         // 1. Top center brand logo (origin (black).png 128x128)
         ImageView topLogo = findViewById(R.id.topLogo);
@@ -483,23 +486,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ImageView bootLogoImage = findViewById(R.id.bootLogoImage);
         if (bootLogoOverlay != null && bootLogoImage != null) {
             boolean showBootLogo = choices.getBoolean("show_boot_logo", true);
-            if (showBootLogo && savedInstanceState == null) {
+            int bootDuration = choices.getInt("boot_logo_duration", 2);
+            if (showBootLogo && bootDuration > 0 && savedInstanceState == null) {
                 Bitmap bootBmp = loadExternalBitmap("boot_logo.png");
                 if (bootBmp != null) {
                     bootLogoImage.setImageBitmap(bootBmp);
                     bootLogoOverlay.setVisibility(View.VISIBLE);
                     bootLogoImage.setAlpha(0f);
-                    bootLogoImage.setScaleX(0.8f);
-                    bootLogoImage.setScaleY(0.8f);
+                    bootLogoImage.setScaleX(0.85f);
+                    bootLogoImage.setScaleY(0.85f);
+                    long holdMs = Math.max(100L, (bootDuration * 1000L) - 800L);
                     bootLogoImage.animate()
                             .alpha(1f)
                             .scaleX(1f)
                             .scaleY(1f)
-                            .setDuration(800)
+                            .setDuration(400)
                             .withEndAction(() -> bootLogoOverlay.animate()
                                     .alpha(0f)
-                                    .setDuration(600)
-                                    .setStartDelay(600)
+                                    .setDuration(400)
+                                    .setStartDelay(holdMs)
                                     .withEndAction(() -> bootLogoOverlay.setVisibility(View.GONE))
                                     .start())
                             .start();
@@ -893,7 +898,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnReorder = findViewById(R.id.btnReorder);
         btnReorder.setOnClickListener(v -> toggleReorder());
         btnReorder.setVisibility(cfg.reorderButton ? View.VISIBLE : View.GONE);
-        if (!cfg.showNetworkPill) btnWifi.setVisibility(View.GONE);
+        if (!cfg.showNetworkPill || !choices.getBoolean("show_network_pill", true)) btnWifi.setVisibility(View.GONE);
+        TextView btnPower = findViewById(R.id.btnPower);
+        if (btnPower != null) {
+            boolean showPower = choices.getBoolean("show_power_pill", true);
+            btnPower.setVisibility(showPower ? View.VISIBLE : View.GONE);
+            btnPower.setOnClickListener(v -> showPowerMenuDialog());
+        }
         showInputsPill = cfg.showInputsPill;
         showInputsMenuRow = cfg.showInputsPill;
         btnLibraryTop = findViewById(R.id.btnLibraryTop);
@@ -2851,7 +2862,260 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (lunar != null) lunar.setTypeface(dateTf);
             TextView gr = findViewById(R.id.greeting);
             if (gr != null) gr.setTypeface(dateTf);
+            TextView weather = findViewById(R.id.weatherWidget);
+            if (weather != null) weather.setTypeface(dateTf);
         }
+        updateCalendarWidget(dateTf);
+        updateWeatherWidget(dateTf);
+    }
+
+    private void showPowerMenuDialog() {
+        String[] options = {
+                getString(R.string.power_screen_off),
+                getString(R.string.power_reboot),
+                getString(R.string.power_shutdown)
+        };
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.power_dialog_title)
+                .setItems(options, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            performScreenOff();
+                            break;
+                        case 1:
+                            confirmAndExecute(getString(R.string.power_reboot), this::performReboot);
+                            break;
+                        case 2:
+                            confirmAndExecute(getString(R.string.power_shutdown), this::performShutdown);
+                            break;
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmAndExecute(String actionName, Runnable action) {
+        new AlertDialog.Builder(this)
+                .setTitle(actionName)
+                .setMessage("Bạn có chắc chắn muốn thực hiện " + actionName + "?")
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> action.run())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void performScreenOff() {
+        if (HomeKeyService.performGlobal(AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)) return;
+        try {
+            sendBroadcast(new Intent("com.xiaomi.mitv.action.enter.sleepModel"));
+        } catch (Exception ignored) {}
+        try {
+            Runtime.getRuntime().exec(new String[]{"input", "keyevent", "26"});
+        } catch (Exception ignored) {}
+        try {
+            Runtime.getRuntime().exec(new String[]{"input", "keyevent", "223"});
+        } catch (Exception ignored) {}
+    }
+
+    private void performReboot() {
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"reboot"});
+            if (p != null) return;
+        } catch (Exception ignored) {}
+        try {
+            Intent reboot = new Intent("android.intent.action.REBOOT");
+            reboot.putExtra("nowait", 1);
+            reboot.putExtra("interval", 1);
+            reboot.putExtra("window", 0);
+            sendBroadcast(reboot);
+        } catch (Exception ignored) {}
+        try {
+            Intent intent = new Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN");
+            intent.putExtra("android.intent.extra.KEY_CONFIRM", false);
+            intent.putExtra("android.intent.extra.REBOOT", true);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return;
+        } catch (Exception ignored) {}
+        HomeKeyService.performGlobal(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
+    }
+
+    private void performShutdown() {
+        try {
+            Intent intent = new Intent("com.android.internal.intent.action.REQUEST_SHUTDOWN");
+            intent.putExtra("android.intent.extra.KEY_CONFIRM", false);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return;
+        } catch (Exception ignored) {}
+        try {
+            Runtime.getRuntime().exec(new String[]{"reboot", "-p"});
+        } catch (Exception ignored) {}
+        try {
+            sendBroadcast(new Intent("com.xiaomi.eetv.tv911.action_notify_power_off_tv"));
+        } catch (Exception ignored) {}
+        HomeKeyService.performGlobal(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
+    }
+
+    private void updateCalendarWidget(android.graphics.Typeface tf) {
+        LinearLayout calView = findViewById(R.id.calendarWidget);
+        if (calView == null) return;
+        boolean showCal = choices.getBoolean("show_calendar_widget", false);
+        if (!showCal) {
+            calView.setVisibility(View.GONE);
+            return;
+        }
+        calView.setVisibility(View.VISIBLE);
+        calView.removeAllViews();
+
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int todayDay = cal.get(java.util.Calendar.DAY_OF_MONTH);
+        int currentMonth = cal.get(java.util.Calendar.MONTH);
+        int currentYear = cal.get(java.util.Calendar.YEAR);
+
+        TextView header = new TextView(this);
+        header.setText(String.format(java.util.Locale.getDefault(), "THÁNG %d · %d", currentMonth + 1, currentYear));
+        header.setTextColor(0xFF00E5FF);
+        header.setTextSize(10.5f);
+        header.setLetterSpacing(0.12f);
+        header.setGravity(Gravity.CENTER);
+        header.setPadding(0, 0, 0, 2);
+        if (tf != null) header.setTypeface(tf);
+        calView.addView(header);
+
+        LinearLayout weekRow = new LinearLayout(this);
+        weekRow.setOrientation(LinearLayout.HORIZONTAL);
+        String[] dayNames = {"T2", "T3", "T4", "T5", "T6", "T7", "CN"};
+        for (String dayName : dayNames) {
+            TextView d = new TextView(this);
+            d.setText(dayName);
+            d.setTextColor(0x80FFFFFF);
+            d.setTextSize(8.5f);
+            d.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+            d.setLayoutParams(lp);
+            if (tf != null) d.setTypeface(tf);
+            weekRow.addView(d);
+        }
+        calView.addView(weekRow);
+
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        int firstDayOfWeek = cal.get(java.util.Calendar.DAY_OF_WEEK);
+        int shift = (firstDayOfWeek + 5) % 7;
+        int maxDays = cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH);
+
+        int dayCounter = 1;
+        for (int week = 0; week < 6; week++) {
+            if (dayCounter > maxDays) break;
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(0, 0, 0, 1);
+            for (int col = 0; col < 7; col++) {
+                TextView cell = new TextView(this);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                cell.setLayoutParams(lp);
+                cell.setGravity(Gravity.CENTER);
+                cell.setTextSize(9.5f);
+                if (tf != null) cell.setTypeface(tf);
+
+                int cellIndex = week * 7 + col;
+                if (cellIndex >= shift && dayCounter <= maxDays) {
+                    cell.setText(String.valueOf(dayCounter));
+                    if (dayCounter == todayDay) {
+                        cell.setTextColor(0xFF000000);
+                        GradientDrawable pill = new GradientDrawable();
+                        pill.setColor(0xFF00E5FF);
+                        pill.setCornerRadius(6f);
+                        cell.setBackground(pill);
+                    } else {
+                        cell.setTextColor(0xCCFFFFFF);
+                    }
+                    dayCounter++;
+                } else {
+                    cell.setText("");
+                }
+                row.addView(cell);
+            }
+            calView.addView(row);
+        }
+    }
+
+    private void updateWeatherWidget(android.graphics.Typeface tf) {
+        TextView weatherWidget = findViewById(R.id.weatherWidget);
+        if (weatherWidget == null) return;
+        boolean showWeather = choices.getBoolean("show_weather_widget", true);
+        if (!showWeather) {
+            weatherWidget.setVisibility(View.GONE);
+            return;
+        }
+        weatherWidget.setVisibility(View.VISIBLE);
+        if (tf != null) weatherWidget.setTypeface(tf);
+
+        String cached = choices.getString("cached_weather_text", null);
+        long lastFetch = choices.getLong("cached_weather_time", 0);
+        if (cached != null) {
+            weatherWidget.setText(cached);
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - lastFetch > 1800000L || cached == null) {
+            new Thread(() -> {
+                String result = fetchWeatherOnline();
+                if (result != null && !result.isEmpty()) {
+                    runOnUiThread(() -> {
+                        weatherWidget.setText(result);
+                        choices.edit()
+                                .putString("cached_weather_text", result)
+                                .putLong("cached_weather_time", System.currentTimeMillis())
+                                .apply();
+                    });
+                }
+            }).start();
+        }
+    }
+
+    private String fetchWeatherOnline() {
+        try {
+            java.net.URL url = new java.net.URL("https://wttr.in/?format=%c+%t+%C&lang=vi");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "curl/7.68.0");
+            conn.setConnectTimeout(4000);
+            conn.setReadTimeout(4000);
+            if (conn.getResponseCode() == 200) {
+                java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), "UTF-8"));
+                String line = reader.readLine();
+                reader.close();
+                if (line != null && !line.trim().isEmpty() && !line.contains("Unknown") && !line.contains("<html")) {
+                    return line.trim();
+                }
+            }
+        } catch (Exception ignored) {}
+
+        try {
+            java.net.URL url = new java.net.URL("https://api.open-meteo.com/v1/forecast?latitude=21.03&longitude=105.85&current_weather=true");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(4000);
+            conn.setReadTimeout(4000);
+            if (conn.getResponseCode() == 200) {
+                java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream(), "UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) sb.append(line);
+                reader.close();
+                org.json.JSONObject root = new org.json.JSONObject(sb.toString());
+                org.json.JSONObject cw = root.getJSONObject("current_weather");
+                double temp = cw.getDouble("temperature");
+                int code = cw.getInt("weathercode");
+                String desc = "Có mây";
+                String icon = "⛅";
+                if (code == 0) { desc = "Trời quang"; icon = "☀️"; }
+                else if (code <= 3) { desc = "Có mây"; icon = "⛅"; }
+                else if (code >= 51 && code <= 67) { desc = "Mưa nhỏ"; icon = "🌦️"; }
+                else if (code >= 80 && code <= 82) { desc = "Mưa rào"; icon = "🌧️"; }
+                else if (code >= 95) { desc = "Dông"; icon = "⛈️"; }
+                return icon + " " + Math.round(temp) + "°C · " + desc;
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     private android.graphics.Typeface loadTypeface(String name) {
